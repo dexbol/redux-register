@@ -26,7 +26,7 @@ mystore.registerReducer('user.resetpassword', function(state, action) {
     // return newState
 });
 
-mystore.registerReducer('user/profile', function(state, action) {
+mystore.registerReducer('user.profile', function(state, action) {
     // return newState
 });
 
