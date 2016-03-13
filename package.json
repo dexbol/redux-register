@@ -1,6 +1,6 @@
 {
   "name": "redux-register",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "It is a Redux enhancer for register reducer by namespace.",
   "main": "./lib/index.js",
   "scripts": {
