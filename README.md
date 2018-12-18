@@ -3,14 +3,14 @@
 A [store enhancer](http://redux.js.org/docs/Glossary.html#store-enhancer)
 for Redux. 
 
-```js
-npm install --save-dev redux-register
+```shell
+npm install --save redux-register
 ```
 
 ## Useage
 
 It register reducers by namesapce, this make code splitting painless.
-```js
+```javascript
 import {createStore, compose} from 'redux';
 import Register from 'redux-register';
 

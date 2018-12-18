@@ -1,4 +1,3 @@
-
 var reducerShape = {};
 
 var makeFinalStateByReducerShape = function(shape, path, result, state,
