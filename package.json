@@ -4,6 +4,7 @@
   "description": "It is a Redux enhancer for register reducer by namespace.",
   "main": "./lib/index.js",
   "scripts": {
+    "eslint": "eslint ./src/index.js",
     "test": "(function(){return true})();"
   },
   "author": "Kai Zhang <dexbolg@gmail.com>",
@@ -24,6 +25,8 @@
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.0",
+    "eslint": "^5.10.0",
+    "jest": "^23.6.0",
     "redux": "^4.0.1"
   },
   "dependencies": {}

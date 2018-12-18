@@ -1,7 +1,6 @@
 var reducerShape = {};
 
-var makeFinalStateByReducerShape = function(shape, path, result, state,
-        action) {
+function makeFinalStateByReducerShape(shape, path, result, state, action) {
     if (typeof shape === 'function') {
         var obj = result;
         var value = state;
@@ -21,11 +20,12 @@ var makeFinalStateByReducerShape = function(shape, path, result, state,
                 state, action);
         });
     }
-};
+}
 
-var registerReducer = function(namespace, reducer) {
-    var namespace = namespace.split('.');
+function registerReducer(namespace, reducer) {
     var parent = reducerShape;
+
+    namespace = namespace.split('.');
 
     for (var i = 0; i < namespace.length - 1; i++) {
         var key = namespace[i];
@@ -34,9 +34,9 @@ var registerReducer = function(namespace, reducer) {
     }
 
     parent[namespace[namespace.length - 1]] = reducer;
-};
+}
 
-var rootReducer = function(state, action) {
+function rootReducer(state, action) {
     var finalState = {};
 
     if (state) {
@@ -44,35 +44,34 @@ var rootReducer = function(state, action) {
             action); 
     }
     return finalState;
-};
+}
 
-var checkTypeNamespace = function(ns, action) {
+function checkTypeNamespace(ns, action) {
     // The action type does not include a namespace or a right namespace.
     return action.type.indexOf('.') < 0 || action.type.indexOf(ns + '.') === 0;
-};
+}
 
-var enhanceStore = function(store) {
+function enhanceStore(store) {
     store.register = function(namespace, reducer) {
         registerReducer(...arguments);
         this.replaceReducer(rootReducer);
     };
 
-    store.registerByMap = function(namespace, initialState, mapobj) {
-        if (process.env.NODE_ENV != 'production' && mapobj) {
+    store.registerByMap = function(namespace, initialState, mapobj = {}) {
+        if (process.env.NODE_ENV != 'production') {
             for (var p in mapobj) {
                 if (p === 'undefined') {
-                    console.error('ReducerMap object has a undefined key. ' +
-                        'namespace=' + namespace);
+                    throw 'ReducerMap object has a undefined key. ' +
+                        'namespace=' + namespace;
                 } else if (p.indexOf('.') < 0) {
-                    console.warn('You maybe need a action type that includes '+
+                    throw 'You maybe need a action type that includes '+
                         'namespace <'
                         + p + '>. The action type includes namespace can ' +
-                        'improve performance.');
+                        'improve performance.';
                 }
             }
         }
 
-        var mapobj = mapobj || {};
         var updateType = namespace + '.UPDATE';
         if (!mapobj[updateType]) {
             mapobj[updateType] = function(state, action) {
@@ -102,11 +101,11 @@ var enhanceStore = function(store) {
             if (process.env.NODE_ENV != 'production' &&
                 action.type.indexOf('@@redux') < 0) {
                 if (typeof mapobj[action.type] !== 'function') {
-                    console.error('The action type "' + action.type +
-                        '" does not define yet.');
+                    throw 'The action type "' + action.type +
+                        '" does not define yet.';
                 } else if (mapobj[action.type](state, action) === undefined) {
-                    console.error('The reducer should return a new ' +
-                        'state. ' + action.type + 'return undefined');
+                    throw 'The reducer should return a new ' +
+                        'state. ' + action.type + 'return undefined';
                 }
             }
 
@@ -116,12 +115,10 @@ var enhanceStore = function(store) {
     };
 
     return store;
-};
+}
 
 export default function Register() {
     return (next) => (reducer, initialState) => {
-        var store = enhanceStore(next(rootReducer, initialState));
-
-        return store;
+        return enhanceStore(next(rootReducer, initialState));
     };
-};
+}
