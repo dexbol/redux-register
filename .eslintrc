@@ -12,12 +12,6 @@
         "sourceType": "module"
     },
     "rules": {
-        "no-console": [
-            "error",
-            {
-                "allow": ["log", "error"]
-            }
-        ],
         "no-unused-vars": [
             "error",
             {
