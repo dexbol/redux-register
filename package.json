@@ -5,7 +5,7 @@
   "main": "./lib/index.js",
   "scripts": {
     "eslint": "eslint ./src/index.js",
-    "test": "(function(){return true})();"
+    "test": "jest"
   },
   "author": "Kai Zhang <dexbolg@gmail.com>",
   "license": "MIT",
@@ -25,6 +25,8 @@
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "^23.6.0",
     "eslint": "^5.10.0",
     "jest": "^23.6.0",
     "redux": "^4.0.1"

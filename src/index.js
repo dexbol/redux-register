@@ -4,6 +4,7 @@ function makeFinalStateByReducerShape(shape, path, result, state, action) {
     if (typeof shape === 'function') {
         var obj = result;
         var value = state;
+
         for (var i = 0; i < path.length - 1; i++) {
             var key = path[i];
 
@@ -22,6 +23,13 @@ function makeFinalStateByReducerShape(shape, path, result, state, action) {
     }
 }
 
+function rootReducer(state, action) {
+    var finalState = {};
+    makeFinalStateByReducerShape(reducerShape, [], finalState, state,
+        action);
+    return finalState;
+}
+
 function registerReducer(namespace, reducer) {
     var parent = reducerShape;
 
@@ -36,86 +44,84 @@ function registerReducer(namespace, reducer) {
     parent[namespace[namespace.length - 1]] = reducer;
 }
 
-function rootReducer(state, action) {
-    var finalState = {};
-
-    if (state) {
-        makeFinalStateByReducerShape(reducerShape, [], finalState, state,
-            action); 
-    }
-    return finalState;
-}
-
 function checkTypeNamespace(ns, action) {
     // The action type does not include a namespace or a right namespace.
     return action.type.indexOf('.') < 0 || action.type.indexOf(ns + '.') === 0;
 }
 
+function registerReducerByMap(namespace, initialState, mapObj = {}) {
+    if (process.env.NODE_ENV != 'production') {
+        for (var p in mapObj) {
+            if (p === 'undefined') {
+                throw 'ReducerMap object has a undefined key. ' +
+                    'namespace=' + namespace;
+            } else if (p.indexOf('.') < 0) {
+                throw 'You maybe need a action type that includes '+
+                    'namespace [' + namespace + '] <' + p + '>.';
+            }
+        }
+    }
+
+    // Define UPDATE and INIT action for convenience.
+    var updateType = namespace + '.UPDATE';
+    var initType = namespace + '.INIT';
+
+    if (!mapObj[updateType]) {
+        mapObj[updateType] = function(state, action) {
+            // Guess the state is a Immutable collection
+            if (typeof state.merge == 'function' && action.payload) {
+                return state.merge(action.payload);
+            }
+            return state;
+        };
+    }
+    if (!mapObj[initType]) {
+        mapObj[initType] = function(state, action) {
+            return initialState;
+        }
+    }
+
+    registerReducer(namespace, function(state, action) {
+        if (state === undefined) {
+            return initialState
+        }
+
+        if (!checkTypeNamespace(namespace, action)) {
+            return state;
+        }
+
+        // Actions start with @@redux are redux internal actions,
+        // so pass them here.
+        if (process.env.NODE_ENV != 'production' &&
+            action.type.indexOf('@@redux') < 0) {
+            if (typeof mapObj[action.type] !== 'function') {
+                throw 'The action type "' + action.type +
+                    '" does not define yet.';
+            } else if (mapObj[action.type](state, action) === undefined) {
+                throw 'The reducer should return a new ' +
+                    'state. [' + action.type + '] return undefined';
+            }
+        }
+
+        return typeof mapObj[action.type] === 'function' ?
+            mapObj[action.type](state, action) : state;
+    });
+}
+
 function enhanceStore(store) {
-    store.register = function(namespace, reducer) {
-        registerReducer(...arguments);
+    store.register = function() {
+        registerReducerByMap(... arguments);
+        // Performance `replaceReducer` make the redux dispatch
+        // REPLACE action. This effectively populates the new state tree
+        // included the new namespace registerd above.
         this.replaceReducer(rootReducer);
     };
-
-    store.registerByMap = function(namespace, initialState, mapobj = {}) {
-        if (process.env.NODE_ENV != 'production') {
-            for (var p in mapobj) {
-                if (p === 'undefined') {
-                    throw 'ReducerMap object has a undefined key. ' +
-                        'namespace=' + namespace;
-                } else if (p.indexOf('.') < 0) {
-                    throw 'You maybe need a action type that includes '+
-                        'namespace <'
-                        + p + '>. The action type includes namespace can ' +
-                        'improve performance.';
-                }
-            }
-        }
-
-        var updateType = namespace + '.UPDATE';
-        if (!mapobj[updateType]) {
-            mapobj[updateType] = function(state, action) {
-                if (typeof state.merge == 'function') {
-                    return state.merge(action.payload);
-                }
-                return state;
-            };
-        }
-
-        var initType = namespace + '.INIT';
-        if (!mapobj[initType]) {
-            mapobj[initType] = function(state, action) {
-                return initialState;
-            }
-        }
-
-        this.register(namespace, function(state, action) {
-            if (!state) {
-                return initialState
-            }
-
-            if (!checkTypeNamespace(namespace, action)) {
-                return state;
-            }
-
-            if (process.env.NODE_ENV != 'production' &&
-                action.type.indexOf('@@redux') < 0) {
-                if (typeof mapobj[action.type] !== 'function') {
-                    throw 'The action type "' + action.type +
-                        '" does not define yet.';
-                } else if (mapobj[action.type](state, action) === undefined) {
-                    throw 'The reducer should return a new ' +
-                        'state. ' + action.type + 'return undefined';
-                }
-            }
-
-            return typeof mapobj[action.type] === 'function' ?
-                mapobj[action.type](state, action) : state;
-        });
-    };
-
     return store;
 }
+
+// Export functions for test.
+export {reducerShape, makeFinalStateByReducerShape, rootReducer,
+    registerReducer, checkTypeNamespace, registerReducerByMap};
 
 export default function Register() {
     return (next) => (reducer, initialState) => {

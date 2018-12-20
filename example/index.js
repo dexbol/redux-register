@@ -17,6 +17,7 @@ self.actions = {
     pageTwoAdd,
     pageTwoRemove
 };
+self.store = store;
 
 Object.keys(self.actions).forEach(function(k) {
     self.actions[k] = Redux.bindActionCreators(self.actions[k], store.dispatch);
