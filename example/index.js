@@ -1,7 +1,8 @@
 import store from './store.js';
 import {pageOneAdd, pageOneRemove, pageTwoAdd, pageTwoRemove
     } from './actioncreators.js';
-import './reducer.js';
+import './reducer1.js';
+import './reducer2.js';
 
 function updateView() {
     document.querySelector('code').innerHTML = 

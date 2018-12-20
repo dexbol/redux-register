@@ -1,5 +1,4 @@
 # Redux Register
-
 A [store enhancer](http://redux.js.org/docs/Glossary.html#store-enhancer)
 for Redux. 
 
@@ -8,8 +7,8 @@ npm install --save redux-register
 ```
 
 ## Useage
-
 It register reducers by namesapce, this make code splitting painless.
+
 ```javascript
 import {createStore, compose} from 'redux';
 import Register from 'redux-register';
@@ -19,16 +18,77 @@ import Register from 'redux-register';
 var finalCreateStore = compose(Register())(createStore);
 
 // No arguments here, the root reducer was exist in enhancer code.
-var mystore = finalCreateStore();
+var store = finalCreateStore();
 
-// Register a reducer for the page /user/resetpassword
-mystore.registerReducer('user.resetpassword', function(state, action) {
-    // return newState
+// Namespaces and Action Types
+const NAMESPACE = 'page.one';
+const CHANGE_TITLE = NAMESPACE + '.CHANGE_TITLE';
+const APPEND_LIST = NAMESPACE + '.APPEND_LIST';
+
+// Register a reducer for the page.
+store.register('page.one', {
+    title: 'page one',
+    list: []
+}, {
+    [CHANGE_TITLE](state, action) {
+        state.title = action.payload;
+        return state;
+    },
+
+    [APPEND_LIST](state, action) {
+        state = Object.assign({}, state);
+        state.list = state.list.concat(action.payload);
+        return state;
+    }
 });
 
-mystore.registerReducer('user.profile', function(state, action) {
-    // return newState
+// Inital state.
+/*
+{
+    "page": {
+        "one": {
+            "title": "page one",
+            "list": []
+        }
+    }
+}
+*/
+console.info(JSON.stringify(store.getState(), null, 4));
+
+store.dispatch({
+    type: CHANGE_TITLE,
+    payload: 'xx'
 });
 
-console.info(mystore.getState())
+/*
+{
+    "page": {
+        "one": {
+            "title": "xx",
+            "list": []
+        }
+    }
+}
+*/
+console.info(JSON.stringify(store.getState(), null, 4));
+
+store.dispatch({
+    type: APPEND_LIST,
+    payload: 'yy'
+});
+
+/*
+{
+    "page": {
+        "one": {
+            "title": "xx",
+            "list": [
+                "yy"
+            ]
+        }
+    }
+}
+*/
+console.info(JSON.stringify(store.getState(), null, 4));
 ```
+For more details see the example.
