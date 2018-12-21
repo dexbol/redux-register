@@ -138,7 +138,8 @@ test('registerReducer and rootReducer', () => {
 });
 
 test('checkTypeNamespace', () => {
-    expect(checkTypeNamespace('xx', {type: ''})).toBe(true);
+    expect(checkTypeNamespace('xx', {type: 'xx'})).toBe(false);
+    expect(checkTypeNamespace('y', {type: 'x'})).toBe(false);
     expect(checkTypeNamespace('a.b', {type: 'a.b'})).toBe(false);
     expect(checkTypeNamespace('b.c', {type: 'b.c.x'})).toBe(true);
     expect(checkTypeNamespace('b.c', {type:'a.b.c'})).toBe(false);
@@ -213,6 +214,25 @@ test('INIT and UPDATE actions', () => {
         type: 'page.room.spectator.INIT'
     });
     expect(state3.page.room.spectator).toEqual({name: 'gala'});
+});
+
+test('register top level namespace', () => {
+    registerReducerByMap('user', {
+        name: '',
+        level: 0
+    }, {
+        ['user.CHANGE_NAME'](state, action) {
+            state.name = action.payload;
+            return state;
+        }
+    });
+    var state1 = rootReducer(undefined, {type: ''});
+    expect(state1.user.name).toBe('');
+    var state2 = rootReducer(state1, {
+        type: 'user.CHANGE_NAME',
+        payload: 'k'
+    });
+    expect(state2.user.name).toBe('k');
 });
 
 test('registerReducerByMap', () => {

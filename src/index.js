@@ -45,8 +45,7 @@ function registerReducer(namespace, reducer) {
 }
 
 function checkTypeNamespace(ns, action) {
-    // The action type does not include a namespace or a right namespace.
-    return action.type.indexOf('.') < 0 || action.type.indexOf(ns + '.') === 0;
+    return action.type.indexOf(ns + '.') === 0;
 }
 
 function registerReducerByMap(namespace, initialState, mapObj = {}) {
@@ -90,21 +89,19 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
             return state;
         }
 
-        // Actions start with @@redux are redux internal actions,
-        // so pass them here.
-        if (process.env.NODE_ENV != 'production' &&
-            action.type.indexOf('@@redux') < 0) {
-            if (typeof mapObj[action.type] !== 'function') {
-                throw 'The action type "' + action.type +
-                    '" does not define yet.';
-            } else if (mapObj[action.type](state, action) === undefined) {
-                throw 'The reducer should return a new ' +
-                    'state. [' + action.type + '] return undefined';
-            }
+        if (typeof mapObj[action.type] !== 'function') {
+            throw 'The action type "' + action.type +
+                '" does not define yet.';
         }
 
-        return typeof mapObj[action.type] === 'function' ?
-            mapObj[action.type](state, action) : state;
+        state = mapObj[action.type](state, action);
+
+        if (process.env.NODE_ENV != 'production' && state === undefined) {
+            throw 'The reducer should return a new ' +
+                'state. [' + action.type + '] return undefined';
+        }
+
+        return state;
     });
 }
 
