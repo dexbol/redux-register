@@ -5,7 +5,8 @@
   "main": "./lib/index.js",
   "scripts": {
     "eslint": "eslint ./src/index.js",
-    "test": "jest"
+    "test": "jest",
+    "babel": "babel ./src/index.js -o ./lib/index.js"
   },
   "author": "Kai Zhang <dexbolg@gmail.com>",
   "license": "MIT",
