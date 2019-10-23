@@ -23,14 +23,17 @@
   },
   "homepage": "https://github.com/dexbol/redux-register#readme",
   "devDependencies": {
-    "@babel/cli": "^7.2.0",
-    "@babel/core": "^7.2.2",
-    "@babel/preset-env": "^7.2.0",
-    "babel-core": "^7.0.0-bridge.0",
-    "babel-jest": "^23.6.0",
-    "eslint": "^5.10.0",
-    "jest": "^23.6.0",
-    "redux": "^4.0.1"
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
+    "@babel/preset-env": "^7.6.3",
+    "babel-jest": "^25.0.0",
+    "eslint": "^5.16.0",
+    "jest": "^25.0.0",
+    "prettier": "^1.18.2",
+    "redux": "^4.0.4"
   },
-  "dependencies": {}
+  "dependencies": {
+    "immer": "^4.0.1",
+    "immutable": "^3.8.2"
+  }
 }

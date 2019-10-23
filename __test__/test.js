@@ -1,6 +1,14 @@
-import {reducerShape, makeFinalStateByReducerShape, rootReducer,
-    registerReducer, checkTypeNamespace, registerReducerByMap
-    } from '../src/index.js';
+import Immutable from 'immutable';
+import {isDraft, nothing} from 'immer';
+import {
+    reducerShape,
+    makeFinalStateByReducerShape,
+    rootReducer,
+    registerReducer,
+    checkTypeNamespace,
+    isImmutable,
+    registerReducerByMap
+} from '../src/index.js';
 
 beforeEach(() => {
     for (var p in reducerShape) {
@@ -39,6 +47,9 @@ test('makeFinalStateByReducerShape', () => {
                 };
             }
             return state;
+        }),
+        three: jest.fn((state, action) => {
+            return state;
         })
     };
     var action1 = {
@@ -46,7 +57,7 @@ test('makeFinalStateByReducerShape', () => {
     };
     var action2 = {
         type: 'TEST2'
-    }
+    };
     var finalState = {};
 
     makeFinalStateByReducerShape(shape, [], finalState, rootState, {});
@@ -54,7 +65,8 @@ test('makeFinalStateByReducerShape', () => {
     expect(typeof finalState.one.B).toBe('object');
     expect(finalState.one.B.a).toBe('A');
     expect(finalState.two).toEqual({C: 2});
-    expect(shape.one.B.a.mock.calls.length).toBe(1)
+    expect(finalState.three).toBe(undefined);
+    expect(shape.one.B.a.mock.calls.length).toBe(1);
     expect(shape.one.B.a.mock.calls[0][0]).toBe('A');
     expect(shape.one.B.a.mock.calls[0][1]).toEqual({});
     expect(shape.two.mock.calls.length).toBe(1);
@@ -94,7 +106,7 @@ test('registerReducer and rootReducer', () => {
         if (action.type == TWO_INCREASE) {
             state += 1;
         }
-        return state
+        return state;
     });
     var reducer3 = jest.fn((state, action) => {
         if (!state) {
@@ -142,65 +154,143 @@ test('checkTypeNamespace', () => {
     expect(checkTypeNamespace('y', {type: 'x'})).toBe(false);
     expect(checkTypeNamespace('a.b', {type: 'a.b'})).toBe(false);
     expect(checkTypeNamespace('b.c', {type: 'b.c.x'})).toBe(true);
-    expect(checkTypeNamespace('b.c', {type:'a.b.c'})).toBe(false);
+    expect(checkTypeNamespace('b.c', {type: 'a.b.c'})).toBe(false);
 });
 
 test('registerReducerByMap throw errors', () => {
     expect(() => {
-        registerReducerByMap('one.a.b', {}, {
-            ['INCREASE'](state, action) {
-                return state + 1;
+        registerReducerByMap(
+            'one.a.b',
+            {},
+            {
+                ['INCREASE'](state, action) {
+                    return state + 1;
+                }
             }
-        });
+        );
     }).toThrow(/INCREASE/);
     expect(() => {
-        registerReducerByMap('two', {}, {
-            'undefined': undefined
-        });
+        registerReducerByMap(
+            'two',
+            {},
+            {
+                undefined: undefined
+            }
+        );
     }).toThrow(/two/);
 });
 
 test('reducers registered by registerReducerByMap throw errors', () => {
-    registerReducerByMap('one.a', {}, {
-        ['one.a.INCREASE'](state, action) {
-            return;
+    registerReducerByMap(
+        'one.a',
+        {},
+        {
+            ['one.a.INCREASE'](state, action) {
+                return nothing;
+            }
         }
-    });
+    );
     expect(() => {
-        rootReducer({
-            one: {
-                a: 1
-            }
-        }, {type: 'one.a.INCREASE'});
+        rootReducer(
+            {
+                one: {
+                    a: 1
+                }
+            },
+            {type: 'one.a.INCREASE'}
+        );
     }).toThrow(/new state/);
-    registerReducerByMap('one.b', {}, {
-        ['one.b.INCREASE']: undefined
-    });
+    registerReducerByMap(
+        'one.b',
+        {},
+        {
+            ['one.b.INCREASE']: undefined
+        }
+    );
     expect(() => {
-        rootReducer({
-            one: {
-                b: 0
-            }
-        }, {type: 'one.b.INCREASE'});
+        rootReducer(
+            {
+                one: {
+                    b: 0
+                }
+            },
+            {type: 'one.b.INCREASE'}
+        );
     }).toThrow(/one\.b\.INCREASE/);
 });
 
-test('INIT and UPDATE actions', () => {
-    function State(arg) {
-        if (arg) {
-            for (var p in arg) {
-                this[p] = arg[p];
+test('Adopt immutable.js and immer.js as state', () => {
+    registerReducerByMap(
+        'a.immutable',
+        Immutable.fromJS({
+            name: 'x',
+            list: [
+                {
+                    id: 1,
+                    text: '1'
+                }
+            ]
+        }),
+        {
+            'a.immutable.push': function(state, action) {
+                expect(Immutable.Map.isMap(state)).toBe(true);
+                return state.update('list', (l) => {
+                    return l.push(Immutable.Map(action.payload));
+                });
             }
         }
-    }
+    );
+    registerReducerByMap(
+        'a.immer',
+        {
+            name: 'y',
+            list: [
+                {
+                    id: 1,
+                    text: '1'
+                }
+            ]
+        },
+        {
+            'a.immer.push': function(draftState, action) {
+                expect(isDraft(draftState)).toBe(true);
+                draftState.list.push(action.payload);
+            }
+        }
+    );
+    var state = rootReducer(undefined, {});
 
-    State.prototype.merge = function(arg) {
-        return new State(Object.assign({}, this, arg))
-    };
-    var intialState = new State({name: 'gala'});
-    registerReducerByMap('page.room.spectator', intialState);
+    expect(Immutable.Map.isMap(state.a.immutable)).toBe(true);
+    expect(state.a.immer.list[0].text).toBe('1');
+
+    var state2 = rootReducer(state, {
+        type: 'a.immutable.push',
+        payload: {
+            id: 2,
+            text: '2'
+        }
+    });
+    expect(state2.a.immutable.get('list').size).toBe(2);
+    expect(state2.a.immutable.getIn(['list', 1, 'text'])).toBe('2');
+
+    var state3 = rootReducer(state2, {
+        type: 'a.immer.push',
+        payload: {
+            id: 2,
+            text: '2'
+        }
+    });
+    expect(state3.a.immer.list.length).toBe(2);
+    expect(state3.a.immer.list[1].text).toBe('2');
+});
+
+test('INIT RESET and UPDATE actions with immutable.js', () => {
+    var initalState = Immutable.Map({name: 'gala'});
+
+    registerReducerByMap('page.room.spectator', initalState);
     // The effect as same as store.replaceReduer()
     var state1 = rootReducer(undefined, {type: ''});
+    expect(state1.page.room.spectator).toEqual(initalState);
 
     var state2 = rootReducer(state1, {
         type: 'page.room.spectator.UPDATE',
@@ -208,24 +298,90 @@ test('INIT and UPDATE actions', () => {
             name: 'xx'
         }
     });
-    expect(state2.page.room.spectator).toEqual({name: 'xx'});
+    expect(state2.page.room.spectator.get('name')).toEqual('xx');
 
     var state3 = rootReducer(state2, {
         type: 'page.room.spectator.INIT'
     });
-    expect(state3.page.room.spectator).toEqual({name: 'gala'});
+    expect(state3.page.room.spectator).toBe(initalState);
+
+    var state4 = rootReducer(state3, {
+        type: 'page.room.spectator.UPDATE',
+        payload: {
+            name: 'yy'
+        }
+    });
+    expect(state4.page.room.spectator.get('name')).toBe('yy');
+
+    var state5 = rootReducer(state4, {
+        type: 'page.room.spectator.RESET'
+    });
+    expect(state5.page.room.spectator).toBe(initalState);
+});
+
+test('INIT RESET and UPDATE actions with immer.js', () => {
+    var initalState = {
+        name: 'gala'
+    };
+    registerReducerByMap('x', initalState);
+
+    var state1 = rootReducer(undefined, {});
+    expect(state1.x.name).toBe('gala');
+
+    var state2 = rootReducer(state1, {
+        type: 'x.UPDATE',
+        payload: {
+            name: 'h',
+            list: [1],
+            open: true
+        }
+    });
+    expect(state2.x.list[0]).toBe(1);
+    expect(state2.x.open).toBe(true);
+
+    var state3 = rootReducer(state2, {
+        type: 'x.UPDATE',
+        payload: {
+            list: ['3', '4'],
+            open: false
+        }
+    });
+    expect(state3.x.list[0]).toBe('3');
+    expect(state3.x.open).toBe(false);
+    expect(state3.x.name).toBe('h');
+
+    var state4 = rootReducer(state3, {
+        type: 'x.UPDATE',
+        payload: {
+            name: '凸',
+            list: undefined
+        }
+    });
+    expect(state4.x.list).toBe(undefined);
+    expect(state4.x.name).toBe('凸');
+    expect(state4.x.open).toBe(false);
+
+    var state5 = rootReducer(state4, {
+        type: 'x.RESET'
+    });
+    expect(state5.x.name).toBe('gala');
+    expect(state5.x.open).toBe(undefined);
 });
 
 test('register top level namespace', () => {
-    registerReducerByMap('user', {
-        name: '',
-        level: 0
-    }, {
-        ['user.CHANGE_NAME'](state, action) {
-            state.name = action.payload;
-            return state;
+    registerReducerByMap(
+        'user',
+        {
+            name: '',
+            level: 0
+        },
+        {
+            ['user.CHANGE_NAME'](state, action) {
+                state.name = action.payload;
+                return state;
+            }
         }
-    });
+    );
     var state1 = rootReducer(undefined, {type: ''});
     expect(state1.user.name).toBe('');
     var state2 = rootReducer(state1, {
@@ -236,20 +392,24 @@ test('register top level namespace', () => {
 });
 
 test('registerReducerByMap', () => {
-    registerReducerByMap('page.one', {
-        title: 'pageOne',
-        list: []
-    }, {
-        ['page.one.APPEND_LIST'](state, action) {
-            state = Object.assign({}, state);
-            state.list = state.list.concat(action.payload);
-            return state;
+    registerReducerByMap(
+        'page.one',
+        {
+            title: 'pageOne',
+            list: []
         },
-        ['page.one.CHANGE_TITLE'](state, action) {
-            state.title = action.payload;
-            return state;
+        {
+            ['page.one.APPEND_LIST'](state, action) {
+                state = Object.assign({}, state);
+                state.list = state.list.concat(action.payload);
+                return state;
+            },
+            ['page.one.CHANGE_TITLE'](state, action) {
+                state.title = action.payload;
+                return state;
+            }
         }
-    });
+    );
     var state1 = rootReducer(undefined, {type: ''});
 
     expect(state1.page.one.title).toBe('pageOne');
