@@ -92,3 +92,61 @@ store.dispatch({
 console.info(JSON.stringify(store.getState(), null, 4));
 ```
 For more details see the example.
+
+## immer.js immutable.js integrated in v2
+Since v2.0.0, it need immer.js and immutable.js. But immutable.js will
+remove in next major version.
+
+```javascript
+import Immutable from 'immutable';
+import {isDraft} from 'immer';
+
+// ... createStore ...
+
+store.register('page.a', {
+    name: 'name',
+    list: [1, 2]
+}, {
+    'page.a.PUSH': function(state, action) {
+        // if the initial state is normal object, the state parameter
+        // was a Proxy object that create by immer.js
+        console.log(isDraft(state)); // true
+        state.list.push(3);
+
+        // Don't need return anything
+        // return state;
+    }
+});
+
+store.dispatch({
+    type: 'page.a.PUSH'
+});
+
+// {
+//     page: {
+//         a: {
+//             name: 'name',
+//             list: [1, 2, 3]
+//         }
+//     }
+// }
+console.log(store.getState());
+
+store.register('page.b', Immutable.fromJS({
+    name: 'name',
+    list: [1, 2]
+}), {
+    'page.b.PUSH': function(state, action) {
+        // If the state is a object created by immutable.js,
+        // immer.js wouldn't touch it.
+        return state.update('list', (l) => l.push(3));
+    }
+});
+
+// {
+//     page: {
+//         b: <Immutable.Map>
+//     }
+// }
+console.log(store.getState());
+```
