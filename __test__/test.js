@@ -1,4 +1,3 @@
-import Immutable from 'immutable';
 import {isDraft, nothing} from 'immer';
 import {
     reducerShape,
@@ -6,7 +5,6 @@ import {
     rootReducer,
     registerReducer,
     checkTypeNamespace,
-    isImmutable,
     registerReducerByMap
 } from '../src/index.js';
 
@@ -219,27 +217,7 @@ test('reducers registered by registerReducerByMap throw errors', () => {
     }).toThrow(/one\.b\.INCREASE/);
 });
 
-test('Adopt immutable.js and immer.js as state', () => {
-    registerReducerByMap(
-        'a.immutable',
-        Immutable.fromJS({
-            name: 'x',
-            list: [
-                {
-                    id: 1,
-                    text: '1'
-                }
-            ]
-        }),
-        {
-            'a.immutable.push': function(state, action) {
-                expect(Immutable.Map.isMap(state)).toBe(true);
-                return state.update('list', (l) => {
-                    return l.push(Immutable.Map(action.payload));
-                });
-            }
-        }
-    );
+test('Adopt immer.js as state', () => {
     registerReducerByMap(
         'a.immer',
         {
@@ -260,63 +238,17 @@ test('Adopt immutable.js and immer.js as state', () => {
     );
     var state = rootReducer(undefined, {});
 
-    expect(Immutable.Map.isMap(state.a.immutable)).toBe(true);
     expect(state.a.immer.list[0].text).toBe('1');
 
-    var state2 = rootReducer(state, {
-        type: 'a.immutable.push',
-        payload: {
-            id: 2,
-            text: '2'
-        }
-    });
-    expect(state2.a.immutable.get('list').size).toBe(2);
-    expect(state2.a.immutable.getIn(['list', 1, 'text'])).toBe('2');
-
-    var state3 = rootReducer(state2, {
+    var state1 = rootReducer(state, {
         type: 'a.immer.push',
         payload: {
             id: 2,
             text: '2'
         }
     });
-    expect(state3.a.immer.list.length).toBe(2);
-    expect(state3.a.immer.list[1].text).toBe('2');
-});
-
-test('INIT RESET and UPDATE actions with immutable.js', () => {
-    var initalState = Immutable.Map({name: 'gala'});
-
-    registerReducerByMap('page.room.spectator', initalState);
-    // The effect as same as store.replaceReduer()
-    var state1 = rootReducer(undefined, {type: ''});
-    expect(state1.page.room.spectator).toEqual(initalState);
-
-    var state2 = rootReducer(state1, {
-        type: 'page.room.spectator.UPDATE',
-        payload: {
-            name: 'xx'
-        }
-    });
-    expect(state2.page.room.spectator.get('name')).toEqual('xx');
-
-    var state3 = rootReducer(state2, {
-        type: 'page.room.spectator.INIT'
-    });
-    expect(state3.page.room.spectator).toBe(initalState);
-
-    var state4 = rootReducer(state3, {
-        type: 'page.room.spectator.UPDATE',
-        payload: {
-            name: 'yy'
-        }
-    });
-    expect(state4.page.room.spectator.get('name')).toBe('yy');
-
-    var state5 = rootReducer(state4, {
-        type: 'page.room.spectator.RESET'
-    });
-    expect(state5.page.room.spectator).toBe(initalState);
+    expect(state1.a.immer.list.length).toBe(2);
+    expect(state1.a.immer.list[1].text).toBe('2');
 });
 
 test('INIT RESET and UPDATE actions with immer.js', () => {

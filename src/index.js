@@ -1,5 +1,4 @@
 import produce from 'immer';
-import Immutable from 'immutable';
 
 var reducerShape = {};
 
@@ -56,11 +55,6 @@ function checkTypeNamespace(ns, action) {
     return action.type.indexOf(ns + '.') === 0;
 }
 
-// Immutable 3.x miss the method, simply workaround.
-function isImmutable(o) {
-    return Immutable.Iterable.isIterable(o);
-}
-
 function registerReducerByMap(namespace, initialState, mapObj = {}) {
     if (process.env.NODE_ENV != 'production') {
         for (var p in mapObj) {
@@ -91,19 +85,13 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
             if (typeof data != 'object' || !data) {
                 return state;
             }
-            if (Immutable.Map.isMap(state)) {
-                return state.merge(data);
-            }
-            if (!isImmutable(data)) {
-                return produce(state, function(draft) {
-                    var keys = Object.keys(data);
+            return produce(state, function(draft) {
+                var keys = Object.keys(data);
 
-                    for (var i = 0; i < keys.length; i++) {
-                        draft[keys[i]] = data[keys[i]];
-                    }
-                });
-            }
-            return state;
+                for (var i = 0; i < keys.length; i++) {
+                    draft[keys[i]] = data[keys[i]];
+                }
+            });
         };
     }
     // Deprecated, use reset.
@@ -131,11 +119,7 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
             throw 'The action type "' + action.type + '" does not define yet.';
         }
 
-        if (Immutable.Map.isMap(state)) {
-            state = mapObj[action.type](state, action);
-        } else {
-            state = produce(mapObj[action.type])(state, action);
-        }
+        state = produce(mapObj[action.type])(state, action);
 
         if (process.env.NODE_ENV != 'production' && state === undefined) {
             throw 'The reducer should return a new ' +
@@ -166,7 +150,6 @@ export {
     rootReducer,
     registerReducer,
     checkTypeNamespace,
-    isImmutable,
     registerReducerByMap
 };
 

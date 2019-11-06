@@ -33,7 +33,6 @@
     "redux": "^4.0.4"
   },
   "dependencies": {
-    "immer": "^4.0.1",
-    "immutable": "^3.8.2"
+    "immer": "^4.0.1"
   }
 }

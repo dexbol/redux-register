@@ -150,3 +150,5 @@ store.register('page.b', Immutable.fromJS({
 // }
 console.log(store.getState());
 ```
+
+## Immutable.js dependence pruned in v3
