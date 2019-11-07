@@ -251,7 +251,7 @@ test('Adopt immer.js as state', () => {
     expect(state1.a.immer.list[1].text).toBe('2');
 });
 
-test('INIT RESET and UPDATE actions with immer.js', () => {
+test('RESET and UPDATE actions with immer.js', () => {
     var initalState = {
         name: 'gala'
     };

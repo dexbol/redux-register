@@ -73,31 +73,23 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
         }
     }
 
-    // Define UPDATE and INIT(RESET) action for convenience.
+    // Define UPDATE and RESET action for convenience.
     const UPDATE_TYPE = namespace + '.UPDATE';
-    const INIT_TYPE = namespace + '.INIT';
     const RESET_TYPE = namespace + '.RESET';
 
     if (!mapObj[UPDATE_TYPE]) {
-        mapObj[UPDATE_TYPE] = function(state, action) {
+        mapObj[UPDATE_TYPE] = function(stateDraft, action) {
             var data = action.payload;
 
             if (typeof data != 'object' || !data) {
-                return state;
+                return stateDraft;
             }
-            return produce(state, function(draft) {
-                var keys = Object.keys(data);
 
-                for (var i = 0; i < keys.length; i++) {
-                    draft[keys[i]] = data[keys[i]];
-                }
-            });
-        };
-    }
-    // Deprecated, use reset.
-    if (!mapObj[INIT_TYPE]) {
-        mapObj[INIT_TYPE] = function() {
-            return initialState;
+            var keys = Object.keys(data);
+
+            for (var i = 0; i < keys.length; i++) {
+                stateDraft[keys[i]] = data[keys[i]];
+            }
         };
     }
     if (!mapObj[RESET_TYPE]) {
