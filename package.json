@@ -1,6 +1,6 @@
 {
   "name": "redux-register",
-  "version": "3.1.0",
+  "version": "3.2.0",
   "description": "It is a Redux enhancer for register reducer by namespace.",
   "main": "./lib/index.js",
   "scripts": {
@@ -33,6 +33,6 @@
     "redux": "^4.0.4"
   },
   "dependencies": {
-    "immer": "^4.0.1"
+    "immer": "^9.0.1"
   }
 }
