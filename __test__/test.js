@@ -252,10 +252,10 @@ test('Adopt immer.js as state', () => {
 });
 
 test('RESET and UPDATE actions with immer.js', () => {
-    var initalState = {
+    var initialState = {
         name: 'gala'
     };
-    registerReducerByMap('x', initalState);
+    registerReducerByMap('x', initialState);
 
     var state1 = rootReducer(undefined, {});
     expect(state1.x.name).toBe('gala');
@@ -298,6 +298,30 @@ test('RESET and UPDATE actions with immer.js', () => {
     });
     expect(state5.x.name).toBe('gala');
     expect(state5.x.open).toBe(undefined);
+});
+
+test('RESET and UPDATE actions if initial state is a Array', () => {
+    var initialState = [];
+
+    registerReducerByMap('y', initialState);
+
+    var state1 = rootReducer(undefined, {});
+    expect(Array.isArray(state1.y)).toBe(true);
+    expect(state1.y.length).toBe(0);
+
+    var state2 = rootReducer(state1, {
+        type: 'y.UPDATE',
+        payload: [{name: 1}, {name: '2'}]
+    });
+    expect(state2.y.length).toBe(2);
+    expect(state2.y[1].name).toBe('2');
+
+    var state3 = rootReducer(state2, {
+        type: 'y.UPDATE',
+        payload: [{name: 'a'}]
+    });
+    expect(state3.y[0].name).toBe('a');
+    expect(state3.y[1].name).toBe('2');
 });
 
 test('register top level namespace', () => {
