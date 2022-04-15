@@ -1,38 +1,41 @@
 {
-  "name": "redux-register",
-  "version": "3.2.0",
-  "description": "It is a Redux enhancer for register reducer by namespace.",
-  "main": "./lib/index.js",
-  "scripts": {
-    "eslint": "eslint ./src/index.js",
-    "test": "jest",
-    "babel": "babel ./src/index.js -o ./lib/index.js"
-  },
-  "author": "Kai Zhang <dexbolg@gmail.com>",
-  "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/dexbol/redux-register.git"
-  },
-  "keywords": [
-    "redux",
-    "react"
-  ],
-  "bugs": {
-    "url": "https://github.com/dexbol/redux-register/issues"
-  },
-  "homepage": "https://github.com/dexbol/redux-register#readme",
-  "devDependencies": {
-    "@babel/cli": "^7.6.4",
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "babel-jest": "^25.0.0",
-    "eslint": "^5.16.0",
-    "jest": "^25.0.0",
-    "prettier": "^1.18.2",
-    "redux": "^4.0.4"
-  },
-  "dependencies": {
-    "immer": "^9.0.1"
-  }
+    "name": "redux-register",
+    "version": "4.0.0",
+    "description": "It is a Redux enhancer for register reducer by namespace.",
+    "scripts": {
+        "eslint": "eslint ./src/index.js",
+        "test": "jest",
+        "babel": "babel ./src/index.js -o ./lib/index.js"
+    },
+    "type": "module",
+    "exports": {
+        ".": "./lib/index.js"
+    },
+    "author": "Zhang Kai <dexbolg@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dexbol/redux-register.git"
+    },
+    "keywords": [
+        "redux",
+        "react"
+    ],
+    "bugs": {
+        "url": "https://github.com/dexbol/redux-register/issues"
+    },
+    "homepage": "https://github.com/dexbol/redux-register#readme",
+    "devDependencies": {
+        "@babel/cli": "^7.6.4",
+        "@babel/core": "^7.6.4",
+        "@babel/preset-env": "^7.6.3",
+        "babel-jest": "^25.0.0",
+        "eslint": "^5.16.0",
+        "jest": "^25.0.0",
+        "prettier": "^1.18.2",
+        "redux": "^4.0.4"
+    },
+    "dependencies": {
+        "immer": "^9.0.1"
+    }
 }
