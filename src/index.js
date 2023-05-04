@@ -139,18 +139,21 @@ function enhanceStore(store) {
     return store;
 }
 
-// Export functions for test.
+function Register() {
+    return (next) => (reducer, initialState) => {
+        return enhanceStore(next(rootReducer, initialState));
+    };
+
+}
+
 export {
     reducerShape,
     makeFinalStateByReducerShape,
     rootReducer,
     registerReducer,
     checkTypeNamespace,
-    registerReducerByMap
+    registerReducerByMap,
+    Register
 };
 
-export default function Register() {
-    return (next) => (reducer, initialState) => {
-        return enhanceStore(next(rootReducer, initialState));
-    };
-}
+export default Register;

@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals';
 import {isDraft, nothing} from 'immer';
 import {
     reducerShape,
@@ -6,7 +7,7 @@ import {
     registerReducer,
     checkTypeNamespace,
     registerReducerByMap
-} from '../src/index.js';
+} from '../index.js';
 
 beforeEach(() => {
     for (var p in reducerShape) {
@@ -230,7 +231,7 @@ test('Adopt immer.js as state', () => {
             ]
         },
         {
-            'a.immer.push': function(draftState, action) {
+            'a.immer.push': function (draftState, action) {
                 expect(isDraft(draftState)).toBe(true);
                 draftState.list.push(action.payload);
             }
