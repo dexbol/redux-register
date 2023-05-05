@@ -1,6 +1,6 @@
 {
     "name": "redux-register",
-    "version": "4.0.1",
+    "version": "4.0.2",
     "description": "It is a Redux enhancer for register reducer by namespace.",
     "scripts": {
         "eslint": "eslint ./src/index.js",
@@ -37,6 +37,6 @@
         "prettier": "2.8.8"
     },
     "dependencies": {
-        "immer": "^9.0.1"
+        "immer": "^9.0.21"
     }
 }

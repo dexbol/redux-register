@@ -1,8 +1,6 @@
-import {enableES5} from 'immer'
+import {enableES5, produce} from 'immer';
 
 enableES5();
-
-import produce from 'immer';
 
 var reducerShape = {};
 
@@ -23,7 +21,7 @@ function makeFinalStateByReducerShape(shape, path, result, state, action) {
             action
         );
     } else if (shape && typeof shape === 'object') {
-        Object.keys(shape).forEach(function(key) {
+        Object.keys(shape).forEach(function (key) {
             makeFinalStateByReducerShape(
                 shape[key],
                 path.concat(key),
@@ -63,16 +61,20 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
     if (process.env.NODE_ENV != 'production') {
         for (var p in mapObj) {
             if (p === 'undefined') {
-                throw 'ReducerMap object has a undefined key. ' +
+                throw (
+                    'ReducerMap object has a undefined key. ' +
                     'namespace=' +
-                    namespace;
+                    namespace
+                );
             } else if (p.indexOf('.') < 0) {
-                throw 'You maybe need a action type that includes ' +
+                throw (
+                    'You maybe need a action type that includes ' +
                     'namespace [' +
                     namespace +
                     '] <' +
                     p +
-                    '>.';
+                    '>.'
+                );
             }
         }
     }
@@ -82,7 +84,7 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
     const RESET_TYPE = namespace + '.RESET';
 
     if (!mapObj[UPDATE_TYPE]) {
-        mapObj[UPDATE_TYPE] = function(stateDraft, action) {
+        mapObj[UPDATE_TYPE] = function (stateDraft, action) {
             var data = action.payload;
 
             if (typeof data != 'object' || !data) {
@@ -97,12 +99,12 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
         };
     }
     if (!mapObj[RESET_TYPE]) {
-        mapObj[RESET_TYPE] = function() {
+        mapObj[RESET_TYPE] = function () {
             return initialState;
         };
     }
 
-    registerReducer(namespace, function(state, action) {
+    registerReducer(namespace, function (state, action) {
         if (state === undefined) {
             return initialState;
         }
@@ -118,10 +120,12 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
         state = produce(mapObj[action.type])(state, action);
 
         if (process.env.NODE_ENV != 'production' && state === undefined) {
-            throw 'The reducer should return a new ' +
+            throw (
+                'The reducer should return a new ' +
                 'state. [' +
                 action.type +
-                '] return undefined';
+                '] return undefined'
+            );
         }
 
         return state;
@@ -129,7 +133,7 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
 }
 
 function enhanceStore(store) {
-    store.register = function() {
+    store.register = function () {
         registerReducerByMap(...arguments);
         // Performance `replaceReducer` make the redux dispatch
         // REPLACE action. This effectively populates the new state tree
@@ -143,7 +147,6 @@ function Register() {
     return (next) => (reducer, initialState) => {
         return enhanceStore(next(rootReducer, initialState));
     };
-
 }
 
 export {
