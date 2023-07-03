@@ -1,15 +1,14 @@
 {
     "name": "redux-register",
-    "version": "4.0.2",
+    "version": "5.0.0",
     "description": "It is a Redux enhancer for register reducer by namespace.",
     "scripts": {
         "eslint": "eslint ./src/index.js",
-        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "babel": "babel ./src/index.js -o ./lib/index.js"
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
     },
     "type": "module",
     "exports": {
-        ".": "./lib/index.js"
+        ".": "./src/index.js"
     },
     "author": "Zhang Kai <dexbolg@gmail.com>",
     "license": "MIT",
@@ -21,22 +20,26 @@
         "redux",
         "react"
     ],
+    "workspaces": [
+        "examples/*"
+    ],
     "bugs": {
         "url": "https://github.com/dexbol/redux-register/issues"
     },
     "homepage": "https://github.com/dexbol/redux-register#readme",
     "peerDependencies": {
-        "redux": "^4.0.4"
+        "redux": "^4.0.0"
+    },
+    "jest": {
+        "transform": {}
     },
     "devDependencies": {
-        "@babel/cli": "^7.21.5",
-        "@babel/core": "^7.21.8",
-        "@babel/preset-env": "^7.21.5",
         "eslint": "^8.39.0",
         "jest": "^29.5.0",
-        "prettier": "2.8.8"
+        "prettier": "2.8.8",
+        "redux": "^4.2.1"
     },
     "dependencies": {
-        "immer": "^9.0.21"
+        "immer": "^10.0.2"
     }
 }

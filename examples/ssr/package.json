@@ -1,0 +1,16 @@
+{
+    "name": "redux-register-example-ssr",
+    "version": "1.0.0",
+    "description": "It is a Redux enhancer for register reducer by namespace.",
+    "scripts": {
+        "eslint": "eslint ./src/index.js",
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+    },
+    "type": "module",
+    "author": "Zhang Kai <dexbolg@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dexbol/redux-register.git"
+    }
+}

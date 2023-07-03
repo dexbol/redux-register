@@ -1,21 +1,32 @@
 import {jest} from '@jest/globals';
 import {isDraft, nothing} from 'immer';
+import {createStore} from 'redux';
 import {
-    reducerShape,
-    makeFinalStateByReducerShape,
+    reducerStructure,
+    serverStateStructure,
+    makeFinalStateByReducerStructure,
+    mountValueToStructure,
+    getValueFromStructure,
+    createSubStructure,
     rootReducer,
     registerReducer,
     checkTypeNamespace,
-    registerReducerByMap
+    registerReducerByMap,
+    traverseServerState,
+    collectServerState,
+    register
 } from '../index.js';
 
 beforeEach(() => {
-    for (var p in reducerShape) {
-        delete reducerShape[p];
+    for (let p in reducerStructure) {
+        delete reducerStructure[p];
+    }
+    for (let p in serverStateStructure) {
+        delete serverStateStructure[p];
     }
 });
 
-test('makeFinalStateByReducerShape', () => {
+test('makeFinalStateByReducerStructure', () => {
     var rootState = {
         one: {
             A: 1,
@@ -28,12 +39,18 @@ test('makeFinalStateByReducerShape', () => {
             C: 2
         }
     };
-    var shape = {
+    var structure = {
         one: {
             B: {
                 a: jest.fn((state, action) => {
                     if (action.type == 'TEST1') {
                         return 'AA';
+                    }
+                    if (action.type === 'TEST2') {
+                        return 'AAA';
+                    }
+                    if (action.type === 'TEST3') {
+                        return state + '3';
                     }
                     return state;
                 })
@@ -57,38 +74,63 @@ test('makeFinalStateByReducerShape', () => {
     var action2 = {
         type: 'TEST2'
     };
+    var action3 = {
+        type: 'TEST3'
+    };
     var finalState = {};
 
-    makeFinalStateByReducerShape(shape, [], finalState, rootState, {});
+    makeFinalStateByReducerStructure(structure, [], finalState, rootState, {});
     expect(finalState.one.A).toBe(undefined);
     expect(typeof finalState.one.B).toBe('object');
     expect(finalState.one.B.a).toBe('A');
     expect(finalState.two).toEqual({C: 2});
     expect(finalState.three).toBe(undefined);
-    expect(shape.one.B.a.mock.calls.length).toBe(1);
-    expect(shape.one.B.a.mock.calls[0][0]).toBe('A');
-    expect(shape.one.B.a.mock.calls[0][1]).toEqual({});
-    expect(shape.two.mock.calls.length).toBe(1);
-    expect(shape.two.mock.calls[0][0]).toEqual({C: 2});
-    expect(shape.two.mock.calls[0][1]).toEqual({});
+    expect(structure.one.B.a.mock.calls.length).toBe(1);
+    expect(structure.one.B.a.mock.calls[0][0]).toBe('A');
+    expect(structure.one.B.a.mock.calls[0][1]).toEqual({});
+    expect(structure.two.mock.calls.length).toBe(1);
+    expect(structure.two.mock.calls[0][0]).toEqual({C: 2});
+    expect(structure.two.mock.calls[0][1]).toEqual({});
 
     finalState = {};
-    makeFinalStateByReducerShape(shape, [], finalState, rootState, action1);
+    makeFinalStateByReducerStructure(
+        structure,
+        [],
+        finalState,
+        rootState,
+        action1
+    );
     expect(finalState.one.B.a).toBe('AA');
     expect(finalState.two).toEqual({C: 2});
 
     finalState = {};
-    makeFinalStateByReducerShape(shape, [], finalState, rootState, action2);
-    expect(finalState.one.B.a).toBe('A');
+    makeFinalStateByReducerStructure(
+        structure,
+        [],
+        finalState,
+        rootState,
+        action2
+    );
+    expect(finalState.one.B.a).toBe('AAA');
     expect(finalState.two).toEqual({C: 3});
-    expect(shape.one.B.a.mock.calls.length).toBe(3);
-    expect(shape.two.mock.calls.length).toBe(3);
+    expect(structure.one.B.a.mock.calls.length).toBe(3);
+    expect(structure.two.mock.calls.length).toBe(3);
+
+    makeFinalStateByReducerStructure(
+        structure,
+        [],
+        finalState,
+        finalState,
+        action3
+    );
+    expect(finalState.one.B.a).toBe('AAA3');
 });
 
 test('registerReducer and rootReducer', () => {
     const ONE_INCREASE = 'ONE_INCREASE';
     const TWO_INCREASE = 'TWO_INCREASE';
     const THREE_INCREASE = 'THREE_INCREASE';
+
     var reducer1 = jest.fn((state, action) => {
         if (!state) {
             state = 0;
@@ -98,6 +140,7 @@ test('registerReducer and rootReducer', () => {
         }
         return state;
     });
+
     var reducer2 = jest.fn((state, action) => {
         if (!state) {
             state = 0;
@@ -107,6 +150,7 @@ test('registerReducer and rootReducer', () => {
         }
         return state;
     });
+
     var reducer3 = jest.fn((state, action) => {
         if (!state) {
             state = 0;
@@ -120,9 +164,9 @@ test('registerReducer and rootReducer', () => {
     registerReducer('one.a.B', reducer1);
     registerReducer('two', reducer2);
     registerReducer('three.a', reducer3);
-    expect(typeof reducerShape.one.a.B).toBe('function');
-    expect(typeof reducerShape.two).toBe('function');
-    expect(typeof reducerShape.three.a).toBe('function');
+    expect(typeof reducerStructure.one.a.B).toBe('function');
+    expect(typeof reducerStructure.two).toBe('function');
+    expect(typeof reducerStructure.three.a).toBe('function');
 
     var state1 = rootReducer(undefined, {type: ''});
     expect(state1.one.a.B).toBe(0);
@@ -148,12 +192,43 @@ test('registerReducer and rootReducer', () => {
     expect(state5.one.a.B).toBe(1);
 });
 
+test('mountValueToStructure , getValueFromStructure, createSubStructure', () => {
+    var structure = {
+        one: {
+            a: {
+                B: 'x',
+                C: {
+                    D: 'y'
+                }
+            },
+            b: 'x'
+        },
+        two: 2
+    };
+    expect(getValueFromStructure({structure, namespace: 'one.a.B'})).toBe('x');
+    expect(getValueFromStructure({structure, namespace: 'x.y'})).toBe(
+        undefined
+    );
+    expect(getValueFromStructure({structure, namespace: 'two'})).toBe(2);
+
+    mountValueToStructure({structure, namespace: 'one.a.B', value: 'xx'});
+    expect(structure.one.a.B).toBe('xx');
+    mountValueToStructure({structure, namespace: 'a.b.c.d', value: 'haha'});
+    expect(structure.a.b.c.d).toBe('haha');
+
+    var sub = createSubStructure({structure, whiteList: ['one.a.B', 'two']});
+    expect(sub.one.a.B).toBe('xx');
+    expect(sub.two).toBe(2);
+    expect(sub.one.a.C).toBe(undefined);
+    expect(sub.one.b).toBe(undefined);
+});
+
 test('checkTypeNamespace', () => {
-    expect(checkTypeNamespace('xx', {type: 'xx'})).toBe(false);
-    expect(checkTypeNamespace('y', {type: 'x'})).toBe(false);
-    expect(checkTypeNamespace('a.b', {type: 'a.b'})).toBe(false);
-    expect(checkTypeNamespace('b.c', {type: 'b.c.x'})).toBe(true);
-    expect(checkTypeNamespace('b.c', {type: 'a.b.c'})).toBe(false);
+    expect(checkTypeNamespace('xx', 'xx')).toBe(false);
+    expect(checkTypeNamespace('y', 'x')).toBe(false);
+    expect(checkTypeNamespace('a.b', 'a.b')).toBe(false);
+    expect(checkTypeNamespace('b.c', 'b.c.x')).toBe(true);
+    expect(checkTypeNamespace('b.c', 'a.b.c')).toBe(false);
 });
 
 test('registerReducerByMap throw errors', () => {
@@ -349,7 +424,7 @@ test('register top level namespace', () => {
 });
 
 test('registerReducerByMap', () => {
-    registerReducerByMap(
+    var actions = registerReducerByMap(
         'page.one',
         {
             title: 'pageOne',
@@ -366,22 +441,110 @@ test('registerReducerByMap', () => {
                 return state;
             }
         }
-    );
+    ).actions;
     var state1 = rootReducer(undefined, {type: ''});
 
     expect(state1.page.one.title).toBe('pageOne');
     expect(state1.page.one.list).toEqual([]);
+    expect(actions.APPEND_LIST()).toEqual({type: 'page.one.APPEND_LIST'});
 
-    var state2 = rootReducer(state1, {
-        type: 'page.one.CHANGE_TITLE',
-        payload: 'xx'
-    });
+    var state2 = rootReducer(state1, actions.CHANGE_TITLE('xx'));
     expect(state2.page.one.title).toBe('xx');
 
-    var state3 = rootReducer(state2, {
-        type: 'page.one.APPEND_LIST',
-        payload: 'yy'
-    });
+    var state3 = rootReducer(state2, actions.APPEND_LIST('yy'));
     expect(state3.page.one.list).toEqual(['yy']);
     expect(state3.page.one.title).toEqual('xx');
+});
+
+test('traverseServerState and collectServerState', async () => {
+    var serverStateStruct = {
+        one: {
+            a: '',
+            b: function () {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve('b');
+                    }, 100);
+                });
+            }
+        },
+        two: function () {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve('two');
+                }, 200);
+            });
+        }
+    };
+    var serverState = {};
+
+    await traverseServerState(serverStateStruct, [], serverState);
+    expect(serverState.one.a).toBe(undefined);
+    expect(serverState.one.b).toBe('b');
+    expect(serverState.two).toBe('two');
+
+    Object.assign(serverStateStructure, serverStateStruct);
+    var serverState1 = await collectServerState({whiteList: ['one.a']});
+    expect(serverState1.one?.a).toBe(undefined);
+    var serverState2 = await collectServerState({
+        whiteList: ['one.b', 'one.a']
+    });
+    expect(serverState2.one?.b).toBe('b');
+});
+
+test('register page', async () => {
+    register('page.one', {
+        initialState: {
+            title: 'pageOne',
+            list: []
+        },
+        getServerState: () => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        title: 'pageOne-from-server',
+                        list: ['a', 'b', 'c']
+                    });
+                }, 100);
+            });
+        },
+        reducers: {
+            push: (state, action) => {
+                state.list.push(action.payload);
+                return state;
+            }
+        }
+    });
+
+    register('page.two', {
+        initialState: {
+            title: 'pageTwo',
+            list: []
+        },
+        init: (initArg) => {
+            initArg.title = 'pageTwo-from-init';
+            return initArg;
+        },
+        getServerState: () => {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    resolve({
+                        title: 'pageTwo-from-server',
+                        list: ['1', '2', '3']
+                    });
+                }, 100);
+            });
+        }
+    });
+
+    var serverState = await collectServerState({whiteList: ['page.one']});
+
+    expect(serverState.page?.one?.title).toBe('pageOne-from-server');
+    expect(serverState.page?.two?.title).toBe(undefined);
+    expect(serverState.page?.one?.list).toEqual(['a', 'b', 'c']);
+
+    var store = createStore(rootReducer, serverState);
+
+    expect(store.getState().page.one.title).toBe('pageOne-from-server');
+    expect(store.getState().page.one.list).toEqual(['a', 'b', 'c']);
 });

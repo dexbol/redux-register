@@ -1,29 +1,32 @@
-import {enableES5, produce} from 'immer';
+import {produce} from 'immer';
 
-enableES5();
+export const reducerStructure = {};
+export const serverStateStructure = {};
 
-var reducerShape = {};
+export function makeFinalStateByReducerStructure(
+    node,
+    path,
+    result,
+    state,
+    action
+) {
+    if (typeof node === 'function') {
+        for (let i = 0; i < path.length - 1; i++) {
+            let key = path[i];
 
-function makeFinalStateByReducerShape(shape, path, result, state, action) {
-    if (typeof shape === 'function') {
-        var obj = result;
-        var value = state;
-
-        for (var i = 0; i < path.length - 1; i++) {
-            var key = path[i];
-
-            obj = obj[key] = typeof obj[key] === 'undefined' ? {} : obj[key];
-            value = (value && value[key]) || undefined;
+            result = result[key] =
+                typeof result[key] === 'undefined' ? {} : result[key];
+            state = (state && state[key]) || undefined;
         }
 
-        obj[path[path.length - 1]] = shape(
-            value && value[path[path.length - 1]],
+        result[path[path.length - 1]] = node(
+            state && state[path[path.length - 1]],
             action
         );
-    } else if (shape && typeof shape === 'object') {
-        Object.keys(shape).forEach(function (key) {
-            makeFinalStateByReducerShape(
-                shape[key],
+    } else if (node && typeof node === 'object') {
+        Object.keys(node).forEach((key) => {
+            makeFinalStateByReducerStructure(
+                node[key],
                 path.concat(key),
                 result,
                 state,
@@ -33,33 +36,78 @@ function makeFinalStateByReducerShape(shape, path, result, state, action) {
     }
 }
 
-function rootReducer(state, action) {
+export function rootReducer(state, action) {
     var finalState = {};
-    makeFinalStateByReducerShape(reducerShape, [], finalState, state, action);
+
+    makeFinalStateByReducerStructure(
+        reducerStructure,
+        [],
+        finalState,
+        state,
+        action
+    );
+
     return finalState;
 }
 
-function registerReducer(namespace, reducer) {
-    var parent = reducerShape;
+export function mountValueToStructure({structure, namespace, value}) {
+    var node = structure;
+
+    namespace = namespace.split('.');
+    for (let i = 0; i < namespace.length - 1; i++) {
+        let key = namespace[i];
+        node = node[key] = typeof node[key] === 'undefined' ? {} : node[key];
+    }
+    node[namespace[namespace.length - 1]] = value;
+}
+
+export function getValueFromStructure({structure, namespace}) {
+    var node = structure;
 
     namespace = namespace.split('.');
 
-    for (var i = 0; i < namespace.length - 1; i++) {
-        var key = namespace[i];
-        parent = parent[key] =
-            typeof parent[key] === 'undefined' ? {} : parent[key];
+    for (let key of namespace) {
+        node = node[key];
+        if (!node) {
+            return node;
+        }
     }
 
-    parent[namespace[namespace.length - 1]] = reducer;
+    return node;
 }
 
-function checkTypeNamespace(ns, action) {
-    return action.type.indexOf(ns + '.') === 0;
+export function createSubStructure({structure, whiteList}) {
+    var subStructure = {};
+
+    if (whiteList.length === 0) {
+        return structure;
+    }
+    for (let path of whiteList) {
+        mountValueToStructure({
+            structure: subStructure,
+            namespace: path,
+            value: getValueFromStructure({structure, namespace: path})
+        });
+    }
+
+    return subStructure;
 }
 
-function registerReducerByMap(namespace, initialState, mapObj = {}) {
-    if (process.env.NODE_ENV != 'production') {
-        for (var p in mapObj) {
+export function registerReducer(namespace, reducer) {
+    mountValueToStructure({
+        structure: reducerStructure,
+        namespace,
+        value: reducer
+    });
+}
+
+export function checkTypeNamespace(namespace, actionType) {
+    return actionType.indexOf(namespace + '.') === 0;
+}
+
+export function registerReducerByMap(namespace, initialState, mapObj = {}) {
+    if (process.env.NODE_ENV !== 'production') {
+        for (let p in mapObj) {
             if (p === 'undefined') {
                 throw (
                     'ReducerMap object has a undefined key. ' +
@@ -109,7 +157,7 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
             return initialState;
         }
 
-        if (!checkTypeNamespace(namespace, action)) {
+        if (!checkTypeNamespace(namespace, action.type)) {
             return state;
         }
 
@@ -130,33 +178,93 @@ function registerReducerByMap(namespace, initialState, mapObj = {}) {
 
         return state;
     });
+
+    return {
+        actions: Object.keys(mapObj).reduce((result, key) => {
+            result[key.replace(namespace + '.', '')] = function (payload) {
+                return {
+                    type: key,
+                    payload
+                };
+            };
+            return result;
+        }, {})
+    };
 }
+
+function defaultInit(state) {
+    return state;
+}
+
+export async function traverseServerState(node, path, result) {
+    if (typeof node === 'function') {
+        for (let i = 0; i < path.length - 1; i++) {
+            let key = path[i];
+
+            result = result[key] =
+                typeof result[key] === 'undefined' ? {} : result[key];
+        }
+
+        result[path[path.length - 1]] = await node();
+    } else if (node && typeof node === 'object') {
+        for (let key of Object.keys(node)) {
+            await traverseServerState(node[key], path.concat(key), result);
+        }
+    }
+}
+
+export async function collectServerState({whiteList = []}) {
+    var subServerStateStructure = createSubStructure({
+        structure: serverStateStructure,
+        whiteList
+    });
+    var serverState = {};
+
+    await traverseServerState(subServerStateStructure, [], serverState);
+
+    return serverState;
+}
+
+export function register(
+    namespace,
+    {initialState, init = defaultInit, getServerState, reducers = {}}
+) {
+    if (getServerState) {
+        mountValueToStructure({
+            structure: serverStateStructure,
+            namespace,
+            value: getServerState
+        });
+    }
+
+    for (let key of Object.keys(reducers)) {
+        if (!checkTypeNamespace(namespace, key)) {
+            reducers[namespace + '.' + key] = reducers[key];
+            delete reducers[key];
+        }
+    }
+
+    return registerReducerByMap(namespace, initialState, reducers);
+}
+
+export function mountReducer({store, whiteList = []}) {}
 
 function enhanceStore(store) {
     store.register = function () {
         registerReducerByMap(...arguments);
-        // Performance `replaceReducer` make the redux dispatch
-        // REPLACE action. This effectively populates the new state tree
+        // performance `replacereducer` make the redux dispatch
+        // replace action. this effectively populates the new state tree
         // included the new namespace registerd above.
         this.replaceReducer(rootReducer);
+    };
+    store.mount = function () {
+        return mountReducer({store: this});
     };
     return store;
 }
 
-function Register() {
+export default function Register() {
     return (next) => (reducer, initialState) => {
         return enhanceStore(next(rootReducer, initialState));
     };
 }
-
-export {
-    reducerShape,
-    makeFinalStateByReducerShape,
-    rootReducer,
-    registerReducer,
-    checkTypeNamespace,
-    registerReducerByMap,
-    Register
-};
-
-export default Register;
