@@ -1,4 +1,6 @@
 import {produce} from 'immer';
+import {createStore as createReduxStore} from 'redux';
+import thunk from 'redux-thunk';
 
 export const reducerStructure = {};
 export const serverStateStructure = {};
@@ -213,7 +215,7 @@ export async function traverseServerState(node, path, result) {
     }
 }
 
-export async function collectServerState({whiteList = []}) {
+export async function collectServerState({whiteList = []} = {}) {
     var subServerStateStructure = createSubStructure({
         structure: serverStateStructure,
         whiteList
@@ -247,8 +249,6 @@ export function register(
     return registerReducerByMap(namespace, initialState, reducers);
 }
 
-export function mountReducer({store, whiteList = []}) {}
-
 function enhanceStore(store) {
     store.register = function () {
         registerReducerByMap(...arguments);
@@ -256,9 +256,6 @@ function enhanceStore(store) {
         // replace action. this effectively populates the new state tree
         // included the new namespace registerd above.
         this.replaceReducer(rootReducer);
-    };
-    store.mount = function () {
-        return mountReducer({store: this});
     };
     return store;
 }

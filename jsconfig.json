@@ -1,0 +1,5 @@
+{
+    "exclude": ["node_modules", "**/lib/*", "**/dist/*"],
+    "compilerOptions": {},
+    "prettier.configPath": "./prettier.config.cjs"
+}

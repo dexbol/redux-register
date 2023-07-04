@@ -3,8 +3,12 @@
     "version": "1.0.0",
     "description": "It is a Redux enhancer for register reducer by namespace.",
     "scripts": {
-        "eslint": "eslint ./src/index.js",
-        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+        "eslint": "eslint ./src/*.js",
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "babel": "babel ./src --out-dir ./lib",
+        "webpack": "webpack --config ./webpack.config.js",
+        "predev": "npm run babel && (npm run babel -- --watch &) && npm run webpack -- --watch &",
+        "dev": "nodemon ./lib/server.js"
     },
     "type": "module",
     "author": "Zhang Kai <dexbolg@gmail.com>",
@@ -12,5 +16,23 @@
     "repository": {
         "type": "git",
         "url": "git+https://github.com/dexbol/redux-register.git"
+    },
+    "dependencies": {
+        "koa": "^2.14.2",
+        "koa-send": "^5.0.1",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "redux": "^4.2.1",
+        "redux-thunk": "^2.4.2",
+        "use-sync-external-store": "^1.2.0"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.22.5",
+        "@babel/core": "^7.22.5",
+        "@babel/preset-react": "^7.22.5",
+        "babel-loader": "^9.1.2",
+        "nodemon": "^2.0.22",
+        "webpack": "^5.88.1",
+        "webpack-cli": "^5.1.4"
     }
 }
