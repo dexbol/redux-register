@@ -1,10 +1,4 @@
-import React, {
-    createContext,
-    useEffect,
-    useMemo,
-    useContext,
-    useSyncExternalStore
-} from 'react';
+import React, {createContext, useMemo, useContext} from 'react';
 import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector.js';
 
 const storeContext = createContext({});

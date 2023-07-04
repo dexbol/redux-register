@@ -6,10 +6,10 @@ import koaSend from 'koa-send';
 import {createStore} from 'redux';
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
-import {rootReducer, collectServerState} from '../../../src/index.js';
+import {rootReducer, collectServerState} from '../../../lib/index.js';
+import {StorePrivider} from '../../../lib/hook.js';
 import App from './app.js';
 import Page from './page.js';
-import {StorePrivider} from './store.js';
 
 const projectDirname = path.dirname(
     path.join(fileURLToPath(import.meta.url), '..')

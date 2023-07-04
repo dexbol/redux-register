@@ -5,7 +5,7 @@
     "scripts": {
         "eslint": "eslint ./src/*.js",
         "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
-        "babel": "babel ./src --out-dir ./lib",
+        "babel": "babel --root-mode upward ./src --out-dir ./lib",
         "webpack": "webpack --config ./webpack.config.js",
         "predev": "npm run babel && (npm run babel -- --watch &) && npm run webpack -- --watch &",
         "dev": "nodemon ./lib/server.js"

@@ -1,5 +1,5 @@
 import React, {useCallback} from 'react';
-import {useStore} from '../store.js';
+import {useStore} from '../../../../lib/hook.js';
 import {actions} from '../state/featurea.js';
 
 const CompA = function () {

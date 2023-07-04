@@ -1,4 +1,4 @@
-import {register} from '../../../../src/index.js';
+import {register} from '../../../../lib/index.js';
 
 function fetchData() {
     return new Promise((resolve) => {

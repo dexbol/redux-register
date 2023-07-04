@@ -5,8 +5,8 @@ Promise.all([
     import('redux-thunk'),
     import('./app.js'),
     import('./page.js'),
-    import('./store.js'),
-    import('../../../src/index.js')
+    import('../../../lib/hook.js'),
+    import('../../../lib/index.js')
 ]).then(
     ([
         {default: React},

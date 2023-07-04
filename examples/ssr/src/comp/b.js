@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react';
 import {actions} from '../state/featureb.js';
-import {useStore} from '../store.js';
+import {useStore} from '../../../../lib/hook.js';
 
 const CompA = function () {
     var [state, dispatch] = useStore((rootState) => {
