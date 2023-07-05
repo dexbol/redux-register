@@ -3,11 +3,13 @@ import http from 'node:http';
 import {fileURLToPath} from 'node:url';
 import Koa from 'koa';
 import koaSend from 'koa-send';
-import {createStore} from 'redux';
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
-import {rootReducer, collectServerState} from '../../../lib/index.js';
-import {StorePrivider} from '../../../lib/hook.js';
+import {
+    createStore,
+    StorePrivider,
+    collectServerState
+} from '../../../lib/tool.js';
 import App from './app.js';
 import Page from './page.js';
 
@@ -51,10 +53,8 @@ app.use(async (ctx, next) => {
 });
 
 app.use(async (ctx, next) => {
-    var initalState = await collectServerState({
-        whiteList: ['page.featureA', 'page.featureB']
-    });
-    var store = createStore(rootReducer, initalState);
+    var initalState = await collectServerState();
+    var store = createStore(initalState);
 
     var {pipe} = await renderReactNode(
         <App>

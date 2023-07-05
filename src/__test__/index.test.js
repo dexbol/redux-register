@@ -460,18 +460,18 @@ test('traverseServerState and collectServerState', async () => {
     var serverStateStruct = {
         one: {
             a: '',
-            b: function () {
+            b: function ({arg = ''} = {}) {
                 return new Promise((resolve) => {
                     setTimeout(() => {
-                        resolve('b');
+                        resolve('b' + arg);
                     }, 100);
                 });
             }
         },
-        two: function () {
+        two: function ({arg = ''} = {}) {
             return new Promise((resolve) => {
                 setTimeout(() => {
-                    resolve('two');
+                    resolve('two' + arg);
                 }, 200);
             });
         }
@@ -490,6 +490,9 @@ test('traverseServerState and collectServerState', async () => {
         whiteList: ['one.b', 'one.a']
     });
     expect(serverState2.one?.b).toBe('b');
+    var serverState3 = await collectServerState({arg: 'x'});
+    expect(serverState3.one?.b).toBe('bx');
+    expect(serverState3.two).toBe('twox');
 });
 
 test('register page', async () => {

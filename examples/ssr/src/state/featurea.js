@@ -11,7 +11,7 @@ export const {actions} = register('page.featureA', {
                 resolve({
                     list: ['from-server']
                 });
-            }, 600);
+            }, 200);
         });
     },
 

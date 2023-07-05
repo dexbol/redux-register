@@ -1,6 +1,8 @@
-import React from 'react';
+import React, {Suspense} from 'react';
 import CompA from './comp/a.js';
 import CompB from './comp/b.js';
+
+const CompC = React.lazy(() => import('./comp/c.js'));
 
 export default function Page() {
     console.log('render Page');
@@ -11,6 +13,9 @@ export default function Page() {
             <div style={{display: 'flex', justifyContent: 'space-between'}}>
                 <CompA />
                 <CompB />
+                <Suspense>
+                    <CompC />
+                </Suspense>
             </div>
         </div>
     );

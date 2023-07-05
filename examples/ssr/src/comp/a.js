@@ -18,7 +18,7 @@ const CompA = function () {
         (event) => {
             var content = new FormData(event.target.form).get('content');
             dispatch((dispatch, getState) => {
-                setTimeout(dispatch, 600, actions.add(content + ' (async add)'));
+                setTimeout(dispatch, 200, actions.add(content + ' (async add)'));
             });
         },
         [dispatch]

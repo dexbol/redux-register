@@ -4,13 +4,13 @@ function fetchData() {
     return new Promise((resolve) => {
         setTimeout(() => {
             resolve({
-                content: 'some data from server'
+                content: 'featureC some data from server'
             });
-        }, 1000);
+        }, 200);
     });
 }
 
-export const {actions} = register('page.featureB', {
+export const {actions} = register('page.featureC', {
     initialState: {
         content: 'initialState'
     },

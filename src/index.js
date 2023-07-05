@@ -1,6 +1,4 @@
 import {produce} from 'immer';
-import {createStore as createReduxStore} from 'redux';
-import thunk from 'redux-thunk';
 
 export const reducerStructure = {};
 export const serverStateStructure = {};
@@ -39,7 +37,7 @@ export function makeFinalStateByReducerStructure(
 }
 
 export function rootReducer(state, action) {
-    var finalState = {};
+    var finalState = Object.assign({}, state);
 
     makeFinalStateByReducerStructure(
         reducerStructure,
@@ -198,7 +196,7 @@ function defaultInit(state) {
     return state;
 }
 
-export async function traverseServerState(node, path, result) {
+export async function traverseServerState(node, path, result, params) {
     if (typeof node === 'function') {
         for (let i = 0; i < path.length - 1; i++) {
             let key = path[i];
@@ -207,22 +205,27 @@ export async function traverseServerState(node, path, result) {
                 typeof result[key] === 'undefined' ? {} : result[key];
         }
 
-        result[path[path.length - 1]] = await node();
+        result[path[path.length - 1]] = await node(params);
     } else if (node && typeof node === 'object') {
         for (let key of Object.keys(node)) {
-            await traverseServerState(node[key], path.concat(key), result);
+            await traverseServerState(
+                node[key],
+                path.concat(key),
+                result,
+                params
+            );
         }
     }
 }
 
-export async function collectServerState({whiteList = []} = {}) {
+export async function collectServerState({whiteList = [], ...params} = {}) {
     var subServerStateStructure = createSubStructure({
         structure: serverStateStructure,
         whiteList
     });
     var serverState = {};
 
-    await traverseServerState(subServerStateStructure, [], serverState);
+    await traverseServerState(subServerStateStructure, [], serverState, params);
 
     return serverState;
 }
@@ -260,8 +263,10 @@ function enhanceStore(store) {
     return store;
 }
 
-export default function Register() {
+export function Register() {
     return (next) => (reducer, initialState) => {
         return enhanceStore(next(rootReducer, initialState));
     };
 }
+
+export default Register;

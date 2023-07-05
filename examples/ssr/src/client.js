@@ -1,28 +1,18 @@
 Promise.all([
     import('react'),
     import('react-dom/client'),
-    import('redux'),
-    import('redux-thunk'),
     import('./app.js'),
     import('./page.js'),
-    import('../../../lib/hook.js'),
-    import('../../../lib/index.js')
+    import('../../../lib/tool.js')
 ]).then(
     ([
         {default: React},
         {hydrateRoot},
-        {createStore, applyMiddleware},
-        {default: thunk},
         {default: App},
         {default: Page},
-        {StorePrivider},
-        {rootReducer}
+        {createStore, StorePrivider}
     ]) => {
-        var store = createStore(
-            rootReducer,
-            globalThis.__pda?.serverState || {},
-            applyMiddleware(thunk)
-        );
+        var store = createStore(globalThis.__pda?.serverState || {});
 
         hydrateRoot(
             document,

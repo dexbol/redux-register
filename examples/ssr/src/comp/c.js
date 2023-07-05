@@ -1,11 +1,11 @@
 import React, {useCallback} from 'react';
-import {actions} from '../state/featureb.js';
+import {actions} from '../state/featurec.js';
 import {useStore} from '../../../../lib/hook.js';
 
-const CompB = function () {
+const CompC = function () {
     var [state, dispatch] = useStore((rootState) => {
         return {
-            data: rootState.page.featureB
+            data: rootState.page.featureC || ''
         };
     });
 
@@ -16,20 +16,14 @@ const CompB = function () {
         [dispatch]
     );
 
-    console.log('render CompB');
-
-    if (!state.data.content) {
-        return null;
-    }
+    console.log('render CompC');
 
     return (
         <div>
-            <h2>CompB</h2>
-            <ol>
-                {state.data.content.split('\n').map((item, index) => {
-                    return <li key={index}>{item}</li>;
-                })}
-            </ol>
+            <h2>CompC</h2>
+            <div>
+                <p>{state.data.content}</p>
+            </div>
             <form>
                 <textarea onChange={changeHandler} value={state.data.content} />
             </form>
@@ -37,4 +31,4 @@ const CompB = function () {
     );
 };
 
-export default CompB;
+export default CompC;

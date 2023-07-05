@@ -56,9 +56,11 @@ export const StorePrivider = function ({store, children}) {
         };
     }, []);
 
-    return (
-        <storeContext.Provider value={contextValue}>
-            {children}
-        </storeContext.Provider>
+    return React.createElement(
+        storeContext.Provider,
+        {
+            value: contextValue
+        },
+        children
     );
 };
