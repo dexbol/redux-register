@@ -167,7 +167,7 @@ export function registerReducerByMap(namespace, initialState, mapObj = {}) {
 
         state = produce(mapObj[action.type])(state, action);
 
-        if (process.env.NODE_ENV != 'production' && state === undefined) {
+        if (process.env.NODE_ENV !== 'production' && state === undefined) {
             throw (
                 'The reducer should return a new ' +
                 'state. [' +

@@ -1,0 +1,52 @@
+import React, {useCallback, useEffect} from 'react';
+import {register, useStore} from '../../../../lib/tool.js';
+
+const {actions} = register('page.featureD', {
+    initialState: {
+        content: 'featureD inital content'
+    },
+    reducers: {
+        changeContent(state, action) {
+            state.content = action.payload;
+        }
+    }
+});
+
+const CompD = function () {
+    var [state, dispatch] = useStore((rootState) => {
+        return {
+            data: rootState.page.featureD || ''
+        };
+    });
+
+    var changeHandler = useCallback(
+        (event) => {
+            dispatch(actions.changeContent(event.target.value));
+        },
+        [dispatch]
+    );
+
+    useEffect(() => {
+        dispatch(actions.changeContent('change content from useEffect'));
+    }, [dispatch]);
+
+    console.log('render CompD');
+
+    return (
+        <div>
+            <h2>CompD</h2>
+            <p style={{background: '#EEE'}}>
+                This component is for testing register store namespace after the
+                store object created.
+            </p>
+            <div>
+                <p>{state.data.content}</p>
+            </div>
+            <form>
+                <textarea onChange={changeHandler} value={state.data.content} />
+            </form>
+        </div>
+    );
+};
+
+export default CompD;

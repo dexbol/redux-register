@@ -21,6 +21,7 @@ const CompC = function () {
     return (
         <div>
             <h2>CompC</h2>
+            <p style={{background: '#EEE'}}>This component is inner Suspense</p>
             <div>
                 <p>{state.data.content}</p>
             </div>

@@ -1,6 +1,7 @@
 import path from 'node:path';
 import http from 'node:http';
 import {fileURLToPath} from 'node:url';
+import {Writable, Duplex} from 'node:stream';
 import Koa from 'koa';
 import koaSend from 'koa-send';
 import React from 'react';
@@ -18,28 +19,9 @@ const projectDirname = path.dirname(
 );
 const app = new Koa();
 
-function renderReactNode(node, options = {}) {
-    return new Promise((resolve, reject) => {
-        var defaultOption = {
-            bootstrapScriptContent: '',
-            bootstrapScripts: [],
-            onAllReady() {
-                resolve({
-                    pipe
-                });
-            },
-            onError(err) {
-                reject(err);
-            },
-            onShellReady() {},
-            onShellError() {}
-        };
-        var {pipe} = renderToPipeableStream(
-            node,
-            Object.assign(defaultOption, options)
-        );
-    });
-}
+app.on('error', (err) => {
+    console.log(err);
+});
 
 app.use(async (ctx, next) => {
     var pathMatch = /^\/s\/(.+)$/.exec(ctx.request.path);
@@ -55,8 +37,7 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
     var initalState = await collectServerState();
     var store = createStore(initalState);
-
-    var {pipe} = await renderReactNode(
+    var {pipe} = renderToPipeableStream(
         <App>
             <StoreProvider store={store}>
                 <Page />
@@ -71,8 +52,46 @@ app.use(async (ctx, next) => {
             )}}`
         }
     );
+    var dup = new Duplex({
+        construct(callback) {
+            this._buf = [];
+            this._ended = false;
+            this._need = 0;
+            callback();
+        },
+        write(chunk, encoding, callback) {
+            if (this._need > 0) {
+                this.push(chunk, 'utf-8');
+                this._need = 0;
+            } else {
+                this._buf.push(chunk);
+            }
+            callback();
+        },
+        destroy(error, callback) {
+            this._buf = [];
+            callback();
+        },
+        final(callback) {
+            this._ended = true;
+            callback();
+        },
+        read(size) {
+            if (this._buf.length > 0) {
+                this.push(this._buf.shift(), 'utf-8');
+            } else if (this._ended) {
+                this.push(null);
+            } else {
+                this._need = size;
+            }
+        }
+    });
+
+    pipe(dup);
+
+    ctx.response.type = 'text/html';
     ctx.response.status = 200;
-    pipe(ctx.res);
+    ctx.response.body = dup;
 });
 
 http.createServer(app.callback()).listen(3000);

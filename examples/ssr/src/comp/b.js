@@ -18,10 +18,6 @@ const CompB = function () {
 
     console.log('render CompB');
 
-    if (!state.data.content) {
-        return null;
-    }
-
     return (
         <div>
             <h2>CompB</h2>

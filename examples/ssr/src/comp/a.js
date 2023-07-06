@@ -1,8 +1,8 @@
-import React, {useCallback} from 'react';
+import React, {useCallback, memo} from 'react';
 import {useStore} from '../../../../lib/hook.js';
 import {actions} from '../state/featurea.js';
 
-const CompA = function () {
+const CompA = memo(function () {
     var [state, dispatch] = useStore((rootState) => {
         return {
             data: rootState.page.featureA
@@ -18,13 +18,18 @@ const CompA = function () {
         (event) => {
             var content = new FormData(event.target.form).get('content');
             dispatch((dispatch, getState) => {
-                setTimeout(dispatch, 200, actions.add(content + ' (async add)'));
+                setTimeout(
+                    dispatch,
+                    200,
+                    actions.add(content + ' (async add)')
+                );
             });
         },
         [dispatch]
     );
 
     console.log('render CompA');
+
     return (
         <div>
             <h2>CompA</h2>
@@ -45,6 +50,6 @@ const CompA = function () {
             </ul>
         </div>
     );
-};
+});
 
 export default CompA;
