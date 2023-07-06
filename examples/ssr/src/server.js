@@ -7,7 +7,7 @@ import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
 import {
     createStore,
-    StorePrivider,
+    StoreProvider,
     collectServerState
 } from '../../../lib/tool.js';
 import App from './app.js';
@@ -58,9 +58,9 @@ app.use(async (ctx, next) => {
 
     var {pipe} = await renderReactNode(
         <App>
-            <StorePrivider store={store}>
+            <StoreProvider store={store}>
                 <Page />
-            </StorePrivider>
+            </StoreProvider>
         </App>,
         {
             bootstrapScripts: ['/s/main.js'],

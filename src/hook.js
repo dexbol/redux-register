@@ -49,7 +49,7 @@ export function useStore(selector) {
     return [state, store.dispatch];
 }
 
-export const StorePrivider = function ({store, children}) {
+export const StoreProvider = function ({store, children}) {
     var contextValue = useMemo(() => {
         return {
             store

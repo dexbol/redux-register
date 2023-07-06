@@ -10,16 +10,16 @@ Promise.all([
         {hydrateRoot},
         {default: App},
         {default: Page},
-        {createStore, StorePrivider}
+        {createStore, StoreProvider}
     ]) => {
         var store = createStore(globalThis.__pda?.serverState || {});
 
         hydrateRoot(
             document,
             <App>
-                <StorePrivider store={store}>
+                <StoreProvider store={store}>
                     <Page />
-                </StorePrivider>
+                </StoreProvider>
             </App>
         );
     }
