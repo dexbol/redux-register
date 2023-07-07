@@ -2,6 +2,8 @@ import React, {useCallback} from 'react';
 import {actions} from '../state/featureb.js';
 import {useStore} from '../../../../lib/hook.js';
 
+var count = 0;
+
 const CompB = function () {
     var [state, dispatch] = useStore((rootState) => {
         return {
@@ -16,7 +18,7 @@ const CompB = function () {
         [dispatch]
     );
 
-    console.log('render CompB');
+    console.log('render CompB ' + ++count);
 
     return (
         <div>

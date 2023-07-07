@@ -260,6 +260,9 @@ function enhanceStore(store) {
         // included the new namespace registerd above.
         this.replaceReducer(rootReducer);
     };
+    store.reload = function () {
+        this.replaceReducer(rootReducer);
+    };
     return store;
 }
 

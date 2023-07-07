@@ -1,6 +1,8 @@
 import React, {useCallback, useEffect} from 'react';
 import {register, useStore} from '../../../../lib/tool.js';
 
+var count = 0;
+
 const {actions} = register('page.featureD', {
     initialState: {
         content: 'featureD inital content'
@@ -30,7 +32,7 @@ const CompD = function () {
         dispatch(actions.changeContent('change content from useEffect'));
     }, [dispatch]);
 
-    console.log('render CompD');
+    console.log('render CompD ' + ++count);
 
     return (
         <div>

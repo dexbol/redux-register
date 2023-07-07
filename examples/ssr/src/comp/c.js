@@ -2,6 +2,8 @@ import React, {useCallback} from 'react';
 import {actions} from '../state/featurec.js';
 import {useStore} from '../../../../lib/hook.js';
 
+var count = 0;
+
 const CompC = function () {
     var [state, dispatch] = useStore((rootState) => {
         return {
@@ -16,7 +18,7 @@ const CompC = function () {
         [dispatch]
     );
 
-    console.log('render CompC');
+    console.log('render CompC ' + ++count);
 
     return (
         <div>

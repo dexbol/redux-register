@@ -2,7 +2,9 @@ import React, {useCallback, memo} from 'react';
 import {useStore} from '../../../../lib/hook.js';
 import {actions} from '../state/featurea.js';
 
-const CompA = memo(function () {
+var count = 0;
+
+const CompA = memo(function compA() {
     var [state, dispatch] = useStore((rootState) => {
         return {
             data: rootState.page.featureA
@@ -28,7 +30,7 @@ const CompA = memo(function () {
         [dispatch]
     );
 
-    console.log('render CompA');
+    console.log('render CompA ' + ++count);
 
     return (
         <div>

@@ -1,7 +1,9 @@
 import React from 'react';
 
+var count = 0;
+
 const App = function ({children}) {
-    console.log('render App');
+    console.log('render App ' + ++count);
 
     return (
         <html>

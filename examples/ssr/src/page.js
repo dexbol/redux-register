@@ -8,6 +8,8 @@ import React, {
 import CompA from './comp/a.js';
 import CompB from './comp/b.js';
 
+var count = 0;
+
 const CompC = React.lazy(() => import('./comp/c.js'));
 
 export default function Page() {
@@ -26,7 +28,7 @@ export default function Page() {
         });
     }, []);
 
-    console.log('render Page');
+    console.log('render Page ' + ++count);
 
     return (
         <div>
