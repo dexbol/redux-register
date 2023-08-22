@@ -550,4 +550,8 @@ test('register page', async () => {
 
     expect(store.getState().page.one.title).toBe('pageOne-from-server');
     expect(store.getState().page.one.list).toEqual(['a', 'b', 'c']);
+
+    var store2 = createStore(rootReducer);
+
+    expect(store2.getState().page.two.title).toBe('pageTwo-from-init');
 });

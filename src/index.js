@@ -249,7 +249,7 @@ export function register(
         }
     }
 
-    return registerReducerByMap(namespace, initialState, reducers);
+    return registerReducerByMap(namespace, init(initialState), reducers);
 }
 
 function enhanceStore(store) {

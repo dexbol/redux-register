@@ -56,10 +56,11 @@ export function useStore(selector) {
     return [state, store.dispatch];
 }
 
-export const StoreProvider = function ({store, children}) {
+export const StoreProvider = function ({store, extendedContext, children}) {
     var contextValue = useMemo(() => {
         return {
-            store
+            store,
+            ...extendedContext
         };
     }, []);
 
