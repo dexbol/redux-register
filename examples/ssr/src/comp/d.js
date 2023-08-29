@@ -15,11 +15,7 @@ const {actions} = register('page.featureD', {
 });
 
 const CompD = function () {
-    var [state, dispatch] = useStore((rootState) => {
-        return {
-            data: rootState.page.featureD || ''
-        };
-    });
+    var [state, dispatch] = useStore((rootState) => rootState.page.featureD);
 
     var changeHandler = useCallback(
         (event) => {
@@ -42,10 +38,10 @@ const CompD = function () {
                 store object created.
             </p>
             <div>
-                <p>{state.data.content}</p>
+                <p>{state.content}</p>
             </div>
             <form>
-                <textarea onChange={changeHandler} value={state.data.content} />
+                <textarea onChange={changeHandler} value={state.content} />
             </form>
         </div>
     );

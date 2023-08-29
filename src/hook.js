@@ -1,4 +1,4 @@
-import React, {createContext, useMemo, useContext, useEffect} from 'react';
+import React, {createContext, useMemo, useContext} from 'react';
 import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector.js';
 
 const storeContext = createContext({});
@@ -45,13 +45,6 @@ export function useStore(selector) {
         selector,
         shallowEqual
     );
-
-    // If register store namespace after the store object created,
-    // we need replaceReducer to recreate the state, otherwise the state
-    // don't include the namespace's initial state.
-    useEffect(() => {
-        store.reload();
-    }, [store]);
 
     return [state, store.dispatch];
 }

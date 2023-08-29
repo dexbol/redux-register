@@ -5,11 +5,7 @@ import {useStore} from '../../../../lib/hook.js';
 var count = 0;
 
 const CompC = function () {
-    var [state, dispatch] = useStore((rootState) => {
-        return {
-            data: rootState.page.featureC || ''
-        };
-    });
+    var [state, dispatch] = useStore((rootState) => rootState.page.featureC);
 
     var changeHandler = useCallback(
         (event) => {
@@ -25,10 +21,10 @@ const CompC = function () {
             <h2>CompC</h2>
             <p style={{background: '#EEE'}}>This component is inner Suspense</p>
             <div>
-                <p>{state.data.content}</p>
+                <p>{state.content}</p>
             </div>
             <form>
-                <textarea onChange={changeHandler} value={state.data.content} />
+                <textarea onChange={changeHandler} value={state.content} />
             </form>
         </div>
     );

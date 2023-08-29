@@ -1,7 +1,9 @@
+import {createStore} from 'redux';
 import {produce} from 'immer';
 
 export const reducerStructure = {};
 export const serverStateStructure = {};
+export const internalStore = createStore((state) => state);
 
 export function makeFinalStateByReducerStructure(
     node,
@@ -234,6 +236,8 @@ export function register(
     namespace,
     {initialState, init = defaultInit, getServerState, reducers = {}}
 ) {
+    var result;
+
     if (getServerState) {
         mountValueToStructure({
             structure: serverStateStructure,
@@ -249,7 +253,10 @@ export function register(
         }
     }
 
-    return registerReducerByMap(namespace, init(initialState), reducers);
+    result = registerReducerByMap(namespace, init(initialState), reducers);
+    internalStore.dispatch({type: 'reducer-struture-updated'});
+
+    return result;
 }
 
 function enhanceStore(store) {
