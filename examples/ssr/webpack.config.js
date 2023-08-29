@@ -1,3 +1,5 @@
+import webpack from 'webpack';
+
 export default {
     devtool: false,
     mode: 'development',
@@ -15,5 +17,12 @@ export default {
                 }
             }
         ]
-    }
+    },
+    plugins: [
+        new webpack.IgnorePlugin({
+            checkResource(resource) {
+                return resource.indexOf('serverstate.js') > 0;
+            }
+        })
+    ]
 };

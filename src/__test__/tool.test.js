@@ -1,5 +1,5 @@
 import {jest} from '@jest/globals';
-import {register} from '../index.js';
+import {register} from '../register.js';
 import {createStore} from '../tool.js';
 
 test('createStore', () => {

@@ -13,10 +13,9 @@ import {
     registerReducer,
     checkTypeNamespace,
     registerReducerByMap,
-    traverseServerState,
-    collectServerState,
     register
-} from '../index.js';
+} from '../register.js';
+import {traverseServerState, collectServerState} from '../serverstate.js';
 
 beforeEach(() => {
     for (let p in reducerStructure) {

@@ -6,11 +6,8 @@ import Koa from 'koa';
 import koaSend from 'koa-send';
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
-import {
-    createStore,
-    StoreProvider,
-    collectServerState
-} from '../../../lib/tool.js';
+import {StoreProvider} from '../../../lib/index.js';
+import {ServerState} from '../../../lib/serverstate.js';
 import App from './app.js';
 import Page from './page.js';
 
@@ -35,8 +32,12 @@ app.use(async (ctx, next) => {
 });
 
 app.use(async (ctx, next) => {
-    var initalState = await collectServerState();
-    var store = createStore(initalState);
+    var serverState = new ServerState();
+    var store;
+
+    await serverState.collectNamespaces(<Page />);
+    store = await serverState.createServerStore();
+
     var {pipe} = renderToPipeableStream(
         <App>
             <StoreProvider store={store}>
@@ -46,7 +47,7 @@ app.use(async (ctx, next) => {
         {
             bootstrapScripts: ['/s/main.js'],
             bootstrapScriptContent: `self.__pda = {serverState: ${JSON.stringify(
-                initalState,
+                store.getState(),
                 null,
                 4
             )}}`

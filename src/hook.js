@@ -1,7 +1,8 @@
 import React, {createContext, useMemo, useContext} from 'react';
 import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector.js';
+import {namespaceKey} from './register.js';
 
-const storeContext = createContext({});
+export const storeContext = createContext({});
 
 function shallowEqual(objA, objB) {
     if (objA === objB) {
@@ -37,7 +38,7 @@ function shallowEqual(objA, objB) {
 }
 
 export function useStore(selector) {
-    var {store} = useContext(storeContext);
+    var {store, serverStateWhiteList} = useContext(storeContext);
     var state = useSyncExternalStoreWithSelector(
         store.subscribe,
         store.getState,
@@ -46,10 +47,28 @@ export function useStore(selector) {
         shallowEqual
     );
 
+    if (serverStateWhiteList) {
+        try {
+            if (state[namespaceKey]) {
+                serverStateWhiteList.add(state[namespaceKey]);
+            } else {
+                Object.keys(state).forEach((key) => {
+                    if (state[key][namespaceKey]) {
+                        serverStateWhiteList.add(state[key][namespaceKey]);
+                    }
+                });
+            }
+        } catch (e) {
+            if (process.env.NODE_ENV !== 'production') {
+                console.error(e);
+            }
+        }
+    }
+
     return [state, store.dispatch];
 }
 
-export const StoreProvider = function ({store, extendedContext, children}) {
+export const StoreProvider = function ({store, children, ...extendedContext}) {
     var contextValue = useMemo(() => {
         return {
             store,

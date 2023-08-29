@@ -3,7 +3,7 @@ Promise.all([
     import('react-dom/client'),
     import('./app.js'),
     import('./page.js'),
-    import('../../../lib/tool.js')
+    import('../../../lib/index.js')
 ]).then(
     ([
         {default: React},

@@ -1,9 +1,6 @@
 import {createStore as createReduxStore, applyMiddleware, compose} from 'redux';
 import thunk from 'redux-thunk';
-import {internalStore, Register, rootReducer} from './index.js';
-
-export {Register, register, collectServerState} from './index.js';
-export {StoreProvider, useStore} from './hook.js';
+import {internalStore, Register} from './register.js';
 
 export function createStore(initalState) {
     var store = createReduxStore(

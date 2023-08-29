@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
-import {register, useStore} from '../../../../lib/tool.js';
+import {register, useStore} from '../../../../lib/index.js';
 
 var count = 0;
 
