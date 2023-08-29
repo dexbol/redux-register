@@ -2,6 +2,7 @@ import {jest} from '@jest/globals';
 import {isDraft, nothing} from 'immer';
 import {createStore} from 'redux';
 import {
+    namespaceKey,
     reducerStructure,
     serverStateStructure,
     makeFinalStateByReducerStructure,
@@ -234,17 +235,6 @@ test('checkTypeNamespace', () => {
 test('registerReducerByMap throw errors', () => {
     expect(() => {
         registerReducerByMap(
-            'one.a.b',
-            {},
-            {
-                ['INCREASE'](state, action) {
-                    return state + 1;
-                }
-            }
-        );
-    }).toThrow(/INCREASE/);
-    expect(() => {
-        registerReducerByMap(
             'two',
             {},
             {
@@ -454,6 +444,42 @@ test('registerReducerByMap', () => {
     var state3 = rootReducer(state2, actions.APPEND_LIST('yy'));
     expect(state3.page.one.list).toEqual(['yy']);
     expect(state3.page.one.title).toEqual('xx');
+});
+
+test('namespaceKey', () => {
+    var state;
+
+    register('a', {
+        initialState: []
+    });
+    expect(rootReducer(undefined, {type: ''}).a[namespaceKey]).toBe('a');
+
+    register('b.c.d', {
+        initialState: {},
+        reducers: {
+            update(state, action) {
+                state.name = 'x';
+            },
+            update2(state, action) {
+                return {name: 'y'};
+            }
+        }
+    });
+    state = rootReducer(undefined, {type: ''});
+    expect(state.b.c.d[namespaceKey]).toBe('b.c.d');
+    expect(state.b.c.d.name).toBe(undefined);
+    state = rootReducer(state, {type: 'b.c.d.update'});
+    expect(state.b.c.d.name).toBe('x');
+    state = rootReducer(state, {type: 'b.c.d.update2'});
+    expect(state.b.c.d.name).toBe('y');
+    expect(state.b.c.d[namespaceKey]).toBe(undefined);
+
+    register('c.d', {
+        initialState: 'string'
+    });
+    state = rootReducer(undefined, {type: ''});
+    expect(state.c.d).toBe('string');
+    expect(state.c.d[namespaceKey]).toBe(undefined);
 });
 
 test('traverseServerState and collectServerState', async () => {

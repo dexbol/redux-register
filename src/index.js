@@ -1,6 +1,7 @@
 import {createStore} from 'redux';
 import {produce} from 'immer';
 
+export const namespaceKey = Symbol('redux-namespace');
 export const reducerStructure = {};
 export const serverStateStructure = {};
 export const internalStore = createStore((state) => state);
@@ -116,17 +117,12 @@ export function registerReducerByMap(namespace, initialState, mapObj = {}) {
                     'namespace=' +
                     namespace
                 );
-            } else if (p.indexOf('.') < 0) {
-                throw (
-                    'You maybe need a action type that includes ' +
-                    'namespace [' +
-                    namespace +
-                    '] <' +
-                    p +
-                    '>.'
-                );
             }
         }
+    }
+
+    if (typeof initialState === 'object' && initialState !== null) {
+        initialState[namespaceKey] = namespace;
     }
 
     // Define UPDATE and RESET action for convenience.
