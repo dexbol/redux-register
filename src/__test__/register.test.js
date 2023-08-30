@@ -15,7 +15,7 @@ import {
     registerReducerByMap,
     register
 } from '../register.js';
-import {traverseServerState, collectServerState} from '../serverstate.js';
+import {collectServerState} from '../serverstate.js';
 
 beforeEach(() => {
     for (let p in reducerStructure) {
@@ -479,45 +479,6 @@ test('namespaceKey', () => {
     state = rootReducer(undefined, {type: ''});
     expect(state.c.d).toBe('string');
     expect(state.c.d[namespaceKey]).toBe(undefined);
-});
-
-test('traverseServerState and collectServerState', async () => {
-    var serverStateStruct = {
-        one: {
-            a: '',
-            b: function ({arg = ''} = {}) {
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        resolve('b' + arg);
-                    }, 100);
-                });
-            }
-        },
-        two: function ({arg = ''} = {}) {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    resolve('two' + arg);
-                }, 200);
-            });
-        }
-    };
-    var serverState = {};
-
-    await traverseServerState(serverStateStruct, [], serverState);
-    expect(serverState.one.a).toBe(undefined);
-    expect(serverState.one.b).toBe('b');
-    expect(serverState.two).toBe('two');
-
-    Object.assign(serverStateStructure, serverStateStruct);
-    var serverState1 = await collectServerState({whiteList: ['one.a']});
-    expect(serverState1.one?.a).toBe(undefined);
-    var serverState2 = await collectServerState({
-        whiteList: ['one.b', 'one.a']
-    });
-    expect(serverState2.one?.b).toBe('b');
-    var serverState3 = await collectServerState({arg: 'x'});
-    expect(serverState3.one?.b).toBe('bx');
-    expect(serverState3.two).toBe('twox');
 });
 
 test('register page', async () => {

@@ -1,6 +1,6 @@
 {
     "name": "redux-register",
-    "version": "5.6.0",
+    "version": "5.10.0",
     "description": "It is a Redux enhancer for register reducer by namespace.",
     "scripts": {
         "build": "babel ./src --ignore './src/**/*.test.js' --no-copy-ignored --out-dir lib",

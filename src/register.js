@@ -108,7 +108,21 @@ export function checkTypeNamespace(namespace, actionType) {
     return actionType.indexOf(namespace + '.') === 0;
 }
 
-export function registerReducerByMap(namespace, initialState, mapObj = {}) {
+function defaultInit(state) {
+    return state;
+}
+
+export function registerReducerByMap(
+    namespace,
+    initialState,
+    init,
+    mapObj = {}
+) {
+    if (typeof init !== 'function') {
+        mapObj = init || {};
+        init = defaultInit;
+    }
+
     if (process.env.NODE_ENV !== 'production') {
         for (let p in mapObj) {
             if (p === 'undefined') {
@@ -152,7 +166,7 @@ export function registerReducerByMap(namespace, initialState, mapObj = {}) {
 
     registerReducer(namespace, function (state, action) {
         if (state === undefined) {
-            return initialState;
+            return init(initialState);
         }
 
         if (!checkTypeNamespace(namespace, action.type)) {
@@ -190,10 +204,6 @@ export function registerReducerByMap(namespace, initialState, mapObj = {}) {
     };
 }
 
-function defaultInit(state) {
-    return state;
-}
-
 export function register(
     namespace,
     {initialState, init = defaultInit, getServerState, reducers = {}}
@@ -204,7 +214,7 @@ export function register(
         mountValueToStructure({
             structure: serverStateStructure,
             namespace,
-            value: getServerState
+            value: {getServerState, initialState: init(initialState)}
         });
     }
 
@@ -215,7 +225,7 @@ export function register(
         }
     }
 
-    result = registerReducerByMap(namespace, init(initialState), reducers);
+    result = registerReducerByMap(namespace, initialState, init, reducers);
     internalStore.dispatch({type: 'reducer-struture-updated'});
 
     return result;

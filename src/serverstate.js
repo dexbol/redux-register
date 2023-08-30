@@ -5,7 +5,7 @@ import {createStore} from './tool.js';
 import {StoreProvider, storeContext} from './hook.js';
 
 export async function traverseServerState(node, path, result, params) {
-    if (typeof node === 'function') {
+    if (typeof node?.getServerState === 'function') {
         for (let i = 0; i < path.length - 1; i++) {
             let key = path[i];
 
@@ -13,7 +13,10 @@ export async function traverseServerState(node, path, result, params) {
                 typeof result[key] === 'undefined' ? {} : result[key];
         }
 
-        result[path[path.length - 1]] = await node(params);
+        result[path[path.length - 1]] = await node.getServerState({
+            initialState: node.initialState,
+            ...params
+        });
     } else if (node && typeof node === 'object') {
         for (let key of Object.keys(node)) {
             await traverseServerState(
@@ -63,9 +66,10 @@ export class ServerState {
         });
     }
 
-    async createServerStore() {
-        return createStore(
-            await collectServerState({whiteList: Array.from(this.whiteList)})
-        );
+    async collectState(params = {}) {
+        return await collectServerState({
+            whiteList: Array.from(this.whiteList),
+            ...params
+        });
     }
 }
