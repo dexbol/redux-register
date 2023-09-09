@@ -204,6 +204,17 @@ export function registerReducerByMap(
     };
 }
 
+/**
+ * Register a namespace.
+ * @param {string} namespace e.g. 'user' or 'user.profile'
+ * @param {Object} options
+ * @param {Object} options.initialState
+ * @param {function} [options.init] the function to initialize the state,
+ *  the first argument is the initialState
+ * @param {function} [options.getServerState] should return a promise or
+ * a async function
+ * @returns {{actions: Object}}
+ */
 export function register(
     namespace,
     {initialState, init = defaultInit, getServerState, reducers = {}}

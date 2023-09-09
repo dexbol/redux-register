@@ -1,3 +1,5 @@
+/** @module redux-register/serverstate */
+
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
 import {serverStateStructure, createSubStructure} from './register.js';
@@ -42,10 +44,32 @@ export async function collectServerState({whiteList = [], ...params} = {}) {
 }
 
 export class ServerState {
+    /** ServerState */
     constructor() {
+        /**
+         * A Set Object that store which namespaces should be collected in server.
+         * Your can change this property manually.
+         * 
+         * @type {Set}
+         * 
+         * @example
+         * var serverState = new ServerState();
+         *
+         * // If HomePage doesn't need pageMetadata, you can add it manually.
+         * serverState.whiteList.add('pageMetadata');
+         *
+         * await serverState.collectNamespaces(<HomePage />);
+         * // Will include pageMetadata.
+         * console.log(serverState.collectState());
+         */
         this.whiteList = new Set();
     }
 
+    /**
+     * @param {ReactElement} comp
+     * Collect all namespaces that ReactComponent used by useStore hook, collected
+     * namespaces added to the `whiteList` property
+     */
     collectNamespaces(comp) {
         return new Promise((resolve, reject) => {
             var store = createStore();
@@ -66,6 +90,22 @@ export class ServerState {
         });
     }
 
+    /**
+     * @param {Object} params
+     * Performance `getServerState` methods from namespace that in whiteList.
+     * `parameter` will pass to `getServerState`:
+     *
+     * @example
+     * register('pageMetadata', {
+     *     async getServerState({pathname}) {
+     *         // /page/one
+     *         console.log(pathname);
+     *     }
+     * });
+     *
+     * var serverState = new ServerState();
+     * serverState.collectState({pathname: '/page/one'});
+     */
     async collectState(params = {}) {
         return await collectServerState({
             whiteList: Array.from(this.whiteList),

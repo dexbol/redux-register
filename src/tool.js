@@ -2,6 +2,12 @@ import {createStore as createReduxStore, applyMiddleware, compose} from 'redux';
 import thunk from 'redux-thunk';
 import {internalStore, Register} from './register.js';
 
+/**
+ * Create redux store with some middlewares (thunk and Redux Register).
+ * @function
+ * @param {Object} initalState 
+ * @returns {Object} Redux store object.
+ */
 export function createStore(initalState) {
     var store = createReduxStore(
         null,

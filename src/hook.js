@@ -37,6 +37,11 @@ function shallowEqual(objA, objB) {
     return true;
 }
 
+/**
+ * useStore hook.
+ * @param {function} selector the first argument is the root state.
+ * @returns {Array} A array of state and dispatch.
+ */
 export function useStore(selector) {
     var {store, serverStateWhiteList} = useContext(storeContext);
     var state = useSyncExternalStoreWithSelector(
@@ -68,6 +73,14 @@ export function useStore(selector) {
     return [state, store.dispatch];
 }
 
+/**
+ * @function
+ * @param {Object} props 
+ * @param {Object} props.store redux store object
+ * @param {ReactNode} props.children
+ * @param {Object} props.extendedContext extended context
+ * @returns {ReactNode}
+ */
 export const StoreProvider = function ({store, children, ...extendedContext}) {
     var contextValue = useMemo(() => {
         return {
