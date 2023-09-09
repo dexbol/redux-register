@@ -1,5 +1,3 @@
-/** @module redux-register/serverstate */
-
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
 import {serverStateStructure, createSubStructure} from './register.js';
@@ -43,15 +41,17 @@ export async function collectServerState({whiteList = [], ...params} = {}) {
     return serverState;
 }
 
+/**
+ * @class ServerState
+ */
 export class ServerState {
-    /** ServerState */
     constructor() {
         /**
          * A Set Object that store which namespaces should be collected in server.
          * Your can change this property manually.
-         * 
+         *
          * @type {Set}
-         * 
+         *
          * @example
          * var serverState = new ServerState();
          *

@@ -101,10 +101,10 @@ console.log(await serverState.collectState(parameter));
 More examples check [here](/dexbol/redux-register/tree/master/examples)
 
 # API
-## Modules
+## Classes
 
 <dl>
-<dt><a href="#module_redux-register/serverstate">redux-register/serverstate</a></dt>
+<dt><a href="#ServerState">ServerState</a></dt>
 <dd></dd>
 </dl>
 
@@ -124,40 +124,23 @@ More examples check [here](/dexbol/redux-register/tree/master/examples)
 </dd>
 </dl>
 
-<a name="module_redux-register/serverstate"></a>
+<a name="ServerState"></a>
 
-## redux-register/serverstate
+## ServerState
+**Kind**: global class  
 
-* [redux-register/serverstate](#module_redux-register/serverstate)
-    * [.ServerState](#module_redux-register/serverstate.ServerState)
-        * [new exports.ServerState()](#new_module_redux-register/serverstate.ServerState_new)
-        * [.whiteList](#module_redux-register/serverstate.ServerState+whiteList) : <code>Set</code>
-        * [.collectNamespaces(comp)](#module_redux-register/serverstate.ServerState+collectNamespaces)
-        * [.collectState(params)](#module_redux-register/serverstate.ServerState+collectState)
+* [ServerState](#ServerState)
+    * [.whiteList](#ServerState+whiteList) : <code>Set</code>
+    * [.collectNamespaces(comp)](#ServerState+collectNamespaces)
+    * [.collectState(params)](#ServerState+collectState)
 
-<a name="module_redux-register/serverstate.ServerState"></a>
+<a name="ServerState+whiteList"></a>
 
-### redux-register/serverstate.ServerState
-**Kind**: static class of [<code>redux-register/serverstate</code>](#module_redux-register/serverstate)  
-
-* [.ServerState](#module_redux-register/serverstate.ServerState)
-    * [new exports.ServerState()](#new_module_redux-register/serverstate.ServerState_new)
-    * [.whiteList](#module_redux-register/serverstate.ServerState+whiteList) : <code>Set</code>
-    * [.collectNamespaces(comp)](#module_redux-register/serverstate.ServerState+collectNamespaces)
-    * [.collectState(params)](#module_redux-register/serverstate.ServerState+collectState)
-
-<a name="new_module_redux-register/serverstate.ServerState_new"></a>
-
-#### new exports.ServerState()
-ServerState
-
-<a name="module_redux-register/serverstate.ServerState+whiteList"></a>
-
-#### serverState.whiteList : <code>Set</code>
+### serverState.whiteList : <code>Set</code>
 A Set Object that store which namespaces should be collected in server.
 Your can change this property manually.
 
-**Kind**: instance property of [<code>ServerState</code>](#module_redux-register/serverstate.ServerState)  
+**Kind**: instance property of [<code>ServerState</code>](#ServerState)  
 **Example**  
 ```js
 var serverState = new ServerState();
@@ -169,19 +152,19 @@ await serverState.collectNamespaces(<HomePage />);
 // Will include pageMetadata.
 console.log(serverState.collectState());
 ```
-<a name="module_redux-register/serverstate.ServerState+collectNamespaces"></a>
+<a name="ServerState+collectNamespaces"></a>
 
-#### serverState.collectNamespaces(comp)
-**Kind**: instance method of [<code>ServerState</code>](#module_redux-register/serverstate.ServerState)  
+### serverState.collectNamespaces(comp)
+**Kind**: instance method of [<code>ServerState</code>](#ServerState)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | comp | <code>ReactElement</code> | Collect all namespaces that ReactComponent used by useStore hook, collected namespaces added to the `whiteList` property |
 
-<a name="module_redux-register/serverstate.ServerState+collectState"></a>
+<a name="ServerState+collectState"></a>
 
-#### serverState.collectState(params)
-**Kind**: instance method of [<code>ServerState</code>](#module_redux-register/serverstate.ServerState)  
+### serverState.collectState(params)
+**Kind**: instance method of [<code>ServerState</code>](#ServerState)  
 
 | Param | Type | Description |
 | --- | --- | --- |
