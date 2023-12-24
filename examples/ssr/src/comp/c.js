@@ -17,7 +17,7 @@ const CompC = function () {
     console.log('render CompC ' + ++count);
 
     return (
-        <div>
+        <div style={{padding: '6px', background: 'greenyellow'}}>
             <h2>CompC</h2>
             <p style={{background: '#EEE'}}>This component is inner Suspense</p>
             <div>

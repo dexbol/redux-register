@@ -21,7 +21,7 @@ const CompB = function () {
     console.log('render CompB ' + ++count);
 
     return (
-        <div>
+        <div style={{padding: '6px', background: 'deepskyblue'}}>
             <h2>CompB</h2>
             <ol>
                 {state.data.content.split('\n').map((item, index) => {
