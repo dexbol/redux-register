@@ -32,10 +32,10 @@ import {register} from 'redux-register';
 
 register('page.one', {});
 
-// ✅ It is ok
-register('page.tow', {});
+// ✅ It's ok
+register('page.two', {});
 
-// ✅ It is ok
+// ✅ It's ok
 register('metadata', {});
 
 // ❌ Can't do this, page.one is a branch now.

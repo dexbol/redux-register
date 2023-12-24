@@ -31,7 +31,7 @@ const CompD = function () {
     console.log('render CompD ' + ++count);
 
     return (
-        <div>
+        <div style={{padding: '6px', background: 'lightcyan'}}>
             <h2>CompD</h2>
             <p style={{background: '#EEE'}}>
                 This component is for testing register store namespace after the

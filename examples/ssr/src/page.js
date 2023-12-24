@@ -33,7 +33,7 @@ export default function Page() {
     return (
         <div>
             <h1>Page</h1>
-            <div style={{display: 'flex'}}>
+            <div style={{display: 'flex', justifyContent: 'space-around'}}>
                 <CompA />
                 <CompB />
                 <Suspense fallback={<h2>Loadding C</h2>}>

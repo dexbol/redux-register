@@ -33,7 +33,7 @@ const CompA = memo(function compA() {
     console.log('render CompA ' + ++count);
 
     return (
-        <div>
+        <div style={{padding: '6px', background: 'pink'}}>
             <h2>CompA</h2>
             <form onSubmit={submitHandler}>
                 <input name="content" />

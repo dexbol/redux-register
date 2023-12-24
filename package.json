@@ -1,6 +1,6 @@
 {
     "name": "redux-register",
-    "version": "5.10.0",
+    "version": "6.0.1",
     "description": "It is a Redux enhancer for register reducer by namespace.",
     "scripts": {
         "build": "babel ./src --ignore './src/**/*.test.js' --no-copy-ignored --out-dir lib",
@@ -41,8 +41,8 @@
     "peerDependencies": {
         "immer": "^10",
         "react": "^18.2",
-        "redux": "^4",
-        "redux-thunk": "^2.4.2",
+        "redux": "^5",
+        "redux-thunk": "^3",
         "use-sync-external-store": "^1.2.0"
     },
     "devDependencies": {
