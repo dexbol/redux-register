@@ -2,7 +2,7 @@ import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
 import {serverStateStructure, createSubStructure} from './register.js';
 import {createStore} from './tool.js';
-import {StoreProvider, storeContext} from './hook.js';
+import {StoreProvider} from './hook.js';
 
 export async function traverseServerState(node, path, result, params) {
     if (typeof node?.getServerState === 'function') {
@@ -41,34 +41,32 @@ export async function collectServerState({whiteList = [], ...params} = {}) {
     return serverState;
 }
 
-/**
- * @class ServerState
- */
+/** @class ServerState */
 export class ServerState {
     constructor() {
         /**
-         * A Set Object that store which namespaces should be collected in server.
-         * Your can change this property manually.
-         *
-         * @type {Set}
+         * A Set Object that store which namespaces should be collected in
+         * server. Your can change this property manually.
          *
          * @example
-         * var serverState = new ServerState();
+         *     var serverState = new ServerState();
          *
-         * // If HomePage doesn't need pageMetadata, you can add it manually.
-         * serverState.whiteList.add('pageMetadata');
+         *     // If HomePage doesn't need pageMetadata, you can add it manually.
+         *     serverState.whiteList.add('pageMetadata');
          *
-         * await serverState.collectNamespaces(<HomePage />);
-         * // Will include pageMetadata.
-         * console.log(serverState.collectState());
+         *     await serverState.collectNamespaces(<HomePage />);
+         *     // Will include pageMetadata.
+         *     console.log(serverState.collectState());
+         *
+         * @type {Set}
          */
         this.whiteList = new Set();
     }
 
     /**
-     * @param {ReactElement} comp
-     * Collect all namespaces that ReactComponent used by useStore hook, collected
-     * namespaces added to the `whiteList` property
+     * @param {React.ReactNode} comp Collect all namespaces from React Node that
+     *   using useStore hook, the collected namespaces will add to the
+     *   `whiteList` property
      */
     collectNamespaces(comp) {
         return new Promise((resolve, reject) => {
@@ -91,20 +89,25 @@ export class ServerState {
     }
 
     /**
-     * @param {Object} params
-     * Performance `getServerState` methods from namespace that in whiteList.
-     * `parameter` will pass to `getServerState`:
-     *
+     * Traverse the store and collect all namespaces in whiteList.
+     * 
      * @example
-     * register('pageMetadata', {
-     *     async getServerState({pathname}) {
-     *         // /page/one
-     *         console.log(pathname);
-     *     }
-     * });
+     *     register('pageMetadata', {
+     *         async getServerState(param) {
+     *             // {a: 1}
+     *             console.log(param);
+     *         }
+     *     });
      *
-     * var serverState = new ServerState();
-     * serverState.collectState({pathname: '/page/one'});
+     *     var serverState = new ServerState();
+     *     // This param will pass to `getServerState` method
+     *     var param = {a: 1};
+     *     serverState.collectState(param);
+     *
+     * @param {Object} params Performance `getServerState` methods from
+     *   namespace that in whiteList. `parameter` will pass to
+     *   `getServerState`:
+     * @returns {Promise<Object>} The collected server state
      */
     async collectState(params = {}) {
         return await collectServerState({

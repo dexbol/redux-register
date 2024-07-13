@@ -1,0 +1,14 @@
+{
+    "extends": ["@tsconfig/node-lts/tsconfig.json"],
+    "exclude": ["node_modules", "**/node_modules"],
+    "compilerOptions": {
+        "lib": ["es2020", "dom"],
+        "allowJs": true,
+        "checkJs": true,
+        "declaration": true,
+        "emitDeclarationOnly": true,
+        "jsx": "react-jsx",
+        "strict": false
+    },
+    "prettier.configPath": "./prettier.config.js"
+}

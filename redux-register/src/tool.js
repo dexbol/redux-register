@@ -1,14 +1,20 @@
-import {createStore as createReduxStore, applyMiddleware, compose} from 'redux';
+import {
+    legacy_createStore as createReduxStore,
+    applyMiddleware,
+    compose
+} from 'redux';
 import {thunk} from 'redux-thunk';
 import {internalStore, Register} from './register.js';
 
 /**
  * Create redux store with some middlewares (thunk and Redux Register).
+ *
  * @function
  * @param {Object} initalState
  * @returns {Object} Redux store object.
  */
 export function createStore(initalState) {
+    /** @type {import('redux').Store & {reload: () => void}} */
     var store = createReduxStore(
         (state) => state,
         initalState,

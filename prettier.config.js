@@ -1,3 +1,6 @@
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+
 export default {
     printWidth: 80,
     tabWidth: 4,
@@ -12,5 +15,14 @@ export default {
     arrowParens: 'always',
     requirePragma: false,
     insertPragma: false,
-    endOfLine: 'auto'
+    endOfLine: 'auto',
+    plugins: [
+        path.join(
+            path.dirname(fileURLToPath(import.meta.url)),
+            'node_modules',
+            'prettier-plugin-jsdoc',
+            'dist',
+            'index.js'
+        )
+    ]
 };

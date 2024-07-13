@@ -1,0 +1,54 @@
+{
+    "name": "redux-register",
+    "version": "6.0.3",
+    "description": "It is a Redux enhancer for register reducer by namespace.",
+    "scripts": {
+        "build": "babel --root-mode upward ./src --ignore './src/**/*.test.js' --no-copy-ignored --out-dir lib",
+        "eslint": "eslint ./src/index.js",
+        "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
+        "types": "tsc --project ./tsconfig.json",
+        "prepublishOnly": "npm run types && npm run build"
+    },
+    "type": "module",
+    "files": [
+        "./lib",
+        "./types",
+        "./README.md"
+    ],
+    "exports": {
+        "./serverstate": {
+            "types": "./types/serverstate.d.ts",
+            "default": "./lib/serverstate.js"
+        },
+        ".": {
+            "types": "./types/index.d.ts",
+            "default": "./lib/index.js"
+        }
+    },
+    "author": "Zhang Kai <dexbolg@gmail.com>",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dexbol/redux-register.git"
+    },
+    "keywords": [
+        "redux",
+        "react"
+    ],
+    "bugs": {
+        "url": "https://github.com/dexbol/redux-register/issues"
+    },
+    "homepage": "https://github.com/dexbol/redux-register#readme",
+    "jest": {
+        "transform": {
+            "\\.js$": "./src/jest-transform-react.js"
+        }
+    },
+    "peerDependencies": {
+        "immer": "^10",
+        "react": "^18.2",
+        "redux": "^5",
+        "redux-thunk": "^3",
+        "use-sync-external-store": "^1.2.0"
+    }
+}

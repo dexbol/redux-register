@@ -1,4 +1,4 @@
-import {createStore} from 'redux';
+import {legacy_createStore as createStore} from 'redux';
 import {produce} from 'immer';
 
 export const namespaceKey = Symbol('redux-namespace');
@@ -206,14 +206,16 @@ export function registerReducerByMap(
 
 /**
  * Register a namespace.
- * @param {string} namespace e.g. 'user' or 'user.profile'
+ *
+ * @param {string} namespace E.g. 'user' or 'user.profile'
  * @param {Object} options
- * @param {Object} options.initialState
- * @param {function} [options.init] the function to initialize the state,
- *  the first argument is the initialState
- * @param {function} [options.getServerState] should return a promise or
- * a async function
- * @returns {{actions: Object}}
+ * @param {Object} options.initialState The initial state
+ * @param {(initialState: object) => any} [options.init] The function to
+ *   initialize the state, the first argument is the initialState
+ * @param {(params: object) => Promise} [options.getServerState] Should return a
+ *   promise or a async function
+ * @param {import('redux').ReducersMapObject} [options.reducers] The reducer map
+ * @returns {{actions: import('redux').ActionCreatorsMapObject}}
  */
 export function register(
     namespace,
@@ -242,7 +244,7 @@ export function register(
     return result;
 }
 
-function enhanceStore(store) {
+export function enhanceStore(store) {
     store.register = function () {
         registerReducerByMap(...arguments);
         // performance `replacereducer` make the redux dispatch
