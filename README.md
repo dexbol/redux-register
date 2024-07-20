@@ -1,4 +1,3 @@
 # Redux Register
 
-[Redux Register](/dexbol/redux-register/tree/master/redux-register)
-
+[Redux Register](/redux-register)
