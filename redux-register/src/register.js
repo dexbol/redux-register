@@ -1,11 +1,38 @@
 import {legacy_createStore as createStore} from 'redux';
 import {produce} from 'immer';
 
+/**
+ * @template T
+ * @typedef {{[key: string]: T | Structure<T>}} Structure
+ */
+
+/** @typedef {Structure<import('redux').Reducer>} ReducerStructure */
+
+/**
+ * @typedef {{
+ *     getServerState: (...any) => Promise;
+ *     initialState: (any) => any;
+ * }} ServerStateStructureNode
+ */
+
+/** @typedef {Structure<ServerStateStructureNode>} ServerStateStructure */
+
 export const namespaceKey = Symbol('redux-namespace');
+/** @type {ReducerStructure} */
 export const reducerStructure = {};
+/** @type {ServerStateStructure} */
 export const serverStateStructure = {};
 export const internalStore = createStore((state) => state);
 
+/**
+ * Traval the reducer structure and make the final state.
+ *
+ * @param {ReducerStructure | import('redux').Reducer} node
+ * @param {string[]} path
+ * @param {object} result
+ * @param {object} state
+ * @param {import('redux').UnknownAction} action
+ */
 export function makeFinalStateByReducerStructure(
     node,
     path,
@@ -39,6 +66,11 @@ export function makeFinalStateByReducerStructure(
     }
 }
 
+/**
+ * @param {object} state
+ * @param {import('redux').UnknownAction} action
+ * @returns {object}
+ */
 export function rootReducer(state, action) {
     var finalState = Object.assign({}, state);
 
@@ -53,23 +85,33 @@ export function rootReducer(state, action) {
     return finalState;
 }
 
+/**
+ * @param {object} param
+ * @param {Structure<any>} param.structure
+ * @param {string} param.namespace
+ * @param {any} param.value
+ */
 export function mountValueToStructure({structure, namespace, value}) {
     var node = structure;
+    var splitedNamespace = namespace.split('.');
 
-    namespace = namespace.split('.');
-    for (let i = 0; i < namespace.length - 1; i++) {
-        let key = namespace[i];
+    for (let i = 0; i < splitedNamespace.length - 1; i++) {
+        let key = splitedNamespace[i];
         node = node[key] = typeof node[key] === 'undefined' ? {} : node[key];
     }
-    node[namespace[namespace.length - 1]] = value;
+    node[splitedNamespace[splitedNamespace.length - 1]] = value;
 }
 
+/**
+ * @param {object} param
+ * @param {Structure<any>} param.structure
+ * @param {string} param.namespace
+ * @returns {any}
+ */
 export function getValueFromStructure({structure, namespace}) {
     var node = structure;
 
-    namespace = namespace.split('.');
-
-    for (let key of namespace) {
+    for (let key of namespace.split('.')) {
         node = node[key];
         if (!node) {
             return node;
@@ -79,6 +121,12 @@ export function getValueFromStructure({structure, namespace}) {
     return node;
 }
 
+/**
+ * @param {object} param
+ * @param {Structure<any>} param.structure
+ * @param {string[]} param.whiteList
+ * @returns {Structure<any>}
+ */
 export function createSubStructure({structure, whiteList}) {
     var subStructure = {};
 
@@ -96,6 +144,10 @@ export function createSubStructure({structure, whiteList}) {
     return subStructure;
 }
 
+/**
+ * @param {string} namespace
+ * @param {import('redux').Reducer} reducer
+ */
 export function registerReducer(namespace, reducer) {
     mountValueToStructure({
         structure: reducerStructure,
@@ -104,6 +156,11 @@ export function registerReducer(namespace, reducer) {
     });
 }
 
+/**
+ * @param {string} namespace
+ * @param {string} actionType
+ * @returns {boolean}
+ */
 export function checkTypeNamespace(namespace, actionType) {
     return actionType.indexOf(namespace + '.') === 0;
 }
@@ -112,6 +169,13 @@ function defaultInit(state) {
     return state;
 }
 
+/**
+ * @param {string} namespace
+ * @param {any} initialState
+ * @param {(any) => any} init
+ * @param {{[key: string]: import('redux').Reducer}} mapObj
+ * @returns
+ */
 export function registerReducerByMap(
     namespace,
     initialState,
@@ -209,12 +273,13 @@ export function registerReducerByMap(
  *
  * @param {string} namespace E.g. 'user' or 'user.profile'
  * @param {Object} options
- * @param {Object} options.initialState The initial state
- * @param {(initialState: object) => any} [options.init] The function to
- *   initialize the state, the first argument is the initialState
- * @param {(params: object) => Promise} [options.getServerState] Should return a
- *   promise or a async function
- * @param {import('redux').ReducersMapObject} [options.reducers] The reducer map
+ * @param {any} options.initialState The initial state
+ * @param {(initialState: any) => any} [options.init] The function to initialize
+ *   the state, the first argument is the initialState
+ * @param {(...any) => Promise} [options.getServerState] Should return a promise
+ *   or a async function
+ * @param {{[key: string]: import('redux').Reducer}} [options.reducers] The
+ *   reducer map
  * @returns {{actions: import('redux').ActionCreatorsMapObject}}
  */
 export function register(
@@ -245,8 +310,9 @@ export function register(
 }
 
 export function enhanceStore(store) {
-    store.register = function () {
-        registerReducerByMap(...arguments);
+    /** @deprecated */
+    store.register = function (namespace, initialState, init, mapObj) {
+        registerReducerByMap(namespace, initialState, init, mapObj);
         // performance `replacereducer` make the redux dispatch
         // replace action. this effectively populates the new state tree
         // included the new namespace registerd above.
@@ -258,6 +324,7 @@ export function enhanceStore(store) {
     return store;
 }
 
+/** @deprecated */
 export function Register() {
     return (next) => (reducer, initialState) => {
         return enhanceStore(next(rootReducer, initialState));

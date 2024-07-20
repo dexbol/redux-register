@@ -4,6 +4,13 @@ import {serverStateStructure, createSubStructure} from './register.js';
 import {createStore} from './tool.js';
 import {StoreProvider} from './hook.js';
 
+/**
+ * @param {import('./register.js').ServerStateStructureNode
+ *     | import('./register.js').ServerStateStructure} node
+ * @param {string[]} path
+ * @param {object} result
+ * @param {object} params
+ */
 export async function traverseServerState(node, path, result, params) {
     if (typeof node?.getServerState === 'function') {
         for (let i = 0; i < path.length - 1; i++) {
@@ -29,6 +36,12 @@ export async function traverseServerState(node, path, result, params) {
     }
 }
 
+/**
+ * @param {object} param
+ * @param {string[]} [param.whiteList]
+ * @param {object} [param.params]
+ * @returns
+ */
 export async function collectServerState({whiteList = [], ...params} = {}) {
     var subServerStateStructure = createSubStructure({
         structure: serverStateStructure,
@@ -47,16 +60,6 @@ export class ServerState {
         /**
          * A Set Object that store which namespaces should be collected in
          * server. Your can change this property manually.
-         *
-         * @example
-         *     var serverState = new ServerState();
-         *
-         *     // If HomePage doesn't need pageMetadata, you can add it manually.
-         *     serverState.whiteList.add('pageMetadata');
-         *
-         *     await serverState.collectNamespaces(<HomePage />);
-         *     // Will include pageMetadata.
-         *     console.log(serverState.collectState());
          *
          * @type {Set}
          */
@@ -90,7 +93,7 @@ export class ServerState {
 
     /**
      * Traverse the store and collect all namespaces in whiteList.
-     * 
+     *
      * @example
      *     register('pageMetadata', {
      *         async getServerState(param) {
