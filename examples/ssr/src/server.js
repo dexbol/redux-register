@@ -6,8 +6,8 @@ import Koa from 'koa';
 import koaSend from 'koa-send';
 import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
-import {StoreProvider, createStore} from '../../../lib/index.js';
-import {ServerState} from '../../../lib/serverstate.js';
+import {StoreProvider, createStore} from 'redux-register';
+import {ServerState} from 'redux-register/serverstate';
 import App from './app.js';
 import Page from './page.js';
 

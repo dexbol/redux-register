@@ -1,4 +1,4 @@
-import {register} from '../../../../lib/index.js';
+import {register} from 'redux-register';
 
 export const {actions} = register('page.featureA', {
     initialState: {

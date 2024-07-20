@@ -1,5 +1,5 @@
 import React, {useCallback, memo} from 'react';
-import {useStore} from '../../../../lib/hook.js';
+import {useStore} from 'redux-register';
 import {actions} from '../state/featurea.js';
 
 var count = 0;

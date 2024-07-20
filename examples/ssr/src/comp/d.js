@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect} from 'react';
-import {register, useStore} from '../../../../lib/index.js';
+import {register, useStore} from 'redux-register';
 
 var count = 0;
 

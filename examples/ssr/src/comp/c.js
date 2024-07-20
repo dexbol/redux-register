@@ -1,6 +1,6 @@
 import React, {useCallback} from 'react';
 import {actions} from '../state/featurec.js';
-import {useStore} from '../../../../lib/hook.js';
+import {useStore} from 'redux-register';
 
 var count = 0;
 

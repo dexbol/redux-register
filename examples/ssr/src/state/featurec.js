@@ -1,4 +1,4 @@
-import {register} from '../../../../lib/index.js';
+import {register} from 'redux-register';
 
 function fetchData() {
     return new Promise((resolve) => {
