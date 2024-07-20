@@ -1,3 +1,3 @@
 # Redux Register
 
-[Redux Register](/redux-register)
+[Redux Register](https://github.com/dexbol/redux-register/tree/master/redux-register)

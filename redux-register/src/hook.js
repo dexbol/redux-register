@@ -2,6 +2,13 @@ import React, {createContext, useMemo, useContext} from 'react';
 import {useSyncExternalStoreWithSelector} from 'use-sync-external-store/with-selector.js';
 import {namespaceKey} from './register.js';
 
+/**
+ * @type {React.Context<{
+ *     store?: import('redux').Store;
+ *     serverStateWhiteList?: Set<string>;
+ *     [key: string]: any;
+ * }>}
+ */
 export const storeContext = createContext({});
 
 function shallowEqual(objA, objB) {
@@ -49,10 +56,10 @@ function shallowEqual(objA, objB) {
  *         return <h1>{userInfo.name}</h1>;
  *     };
  *
- * @param {(rootState: object) => any} selector The first argument is the root
- *   state.
- * @returns {[any, import('redux').Dispatch]} A array of state and dispatch
- *   function.
+ * @param {(rootState: import('./register.js').Structure<any>) => any} selector
+ *   The first argument is the root state.
+ * @returns {[any, import('redux-thunk').ThunkDispatch]} A array of state and
+ *   dispatch function.
  */
 export function useStore(selector) {
     var {store, serverStateWhiteList} = useContext(storeContext);
@@ -86,11 +93,10 @@ export function useStore(selector) {
 }
 
 /**
- * @typedef {Object} StoreProviderProps
- * @property {Object} props
- * @property {Object} props.store Redux store object
- * @property {React.ReactNode} props.children
- * @property {Object} [props.extendedContext] Additional context properties.
+ * @typedef {{[key: string]: any}} StoreProviderProps
+ * @property {Object} store Redux store object
+ * @property {React.ReactNode} children
+ * @property {Set<string>} [serverStateWhiteList]
  */
 
 /** @type {React.FC<StoreProviderProps>} */
