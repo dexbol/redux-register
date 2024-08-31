@@ -98,4 +98,4 @@ console.log(await serverState.collectState(parameter));
 
 ## Examples
 
-More examples check [here](/dexbol/redux-register/tree/master/examples)
+More examples check [here](https://github.com/dexbol/redux-register/tree/master/examples)

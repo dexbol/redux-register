@@ -17,7 +17,7 @@ import {produce} from 'immer';
 
 /** @typedef {Structure<ServerStateStructureNode>} ServerStateStructure */
 
-export const namespaceKey = Symbol('redux-namespace');
+export const namespaceKey = Symbol.for('redux-register-namespace');
 /** @type {ReducerStructure} */
 export const reducerStructure = {};
 /** @type {ServerStateStructure} */
@@ -304,7 +304,7 @@ export function register(
     }
 
     result = registerReducerByMap(namespace, initialState, init, reducers);
-    internalStore.dispatch({type: 'reducer-struture-updated'});
+    internalStore.dispatch({type: 'reducer-structure-updated'});
 
     return result;
 }

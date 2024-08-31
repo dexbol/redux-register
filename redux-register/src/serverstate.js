@@ -70,13 +70,19 @@ export class ServerState {
      * @param {React.ReactNode} comp Collect all namespaces from React Node that
      *   using useStore hook, the collected namespaces will add to the
      *   `whiteList` property
+     * @param {Object} [options]
+     * @param {import('redux').Store} [options.store] Redux store for collecting
+     *   namespaces
      */
-    collectNamespaces(comp) {
+    collectNamespaces(comp, {store} = {}) {
         return new Promise((resolve, reject) => {
-            var store = createStore();
+            var theStore = store || createStore();
             var whiteList = this.whiteList;
+
             renderToPipeableStream(
-                <StoreProvider store={store} serverStateWhiteList={whiteList}>
+                <StoreProvider
+                    store={theStore}
+                    serverStateWhiteList={whiteList}>
                     {comp}
                 </StoreProvider>,
                 {
@@ -84,7 +90,7 @@ export class ServerState {
                         resolve(whiteList);
                     },
                     onError(err) {
-                        resolve(whiteList);
+                        reject(err);
                     }
                 }
             );

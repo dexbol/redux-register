@@ -1,10 +1,9 @@
 import path from 'node:path';
 import http from 'node:http';
 import {fileURLToPath} from 'node:url';
-import {Writable, Duplex} from 'node:stream';
+import {Duplex} from 'node:stream';
 import Koa from 'koa';
 import koaSend from 'koa-send';
-import React from 'react';
 import {renderToPipeableStream} from 'react-dom/server';
 import {StoreProvider, createStore} from 'redux-register';
 import {ServerState} from 'redux-register/serverstate';
@@ -14,6 +13,7 @@ import Page from './page.js';
 const projectDirname = path.dirname(
     path.join(fileURLToPath(import.meta.url), '..')
 );
+
 const app = new Koa();
 
 app.on('error', (err) => {
@@ -34,10 +34,14 @@ app.use(async (ctx, next) => {
 app.use(async (ctx, next) => {
     var serverState = new ServerState();
 
-    await serverState.collectNamespaces(<Page />);
+    await serverState.collectNamespaces(<Page />, {
+        store: createStore({
+            page: {featureA: ['collecting namespaces']}
+        })
+    });
 
     var state = await serverState.collectState();
-    var store = createStore(state)
+    var store = createStore(state);
 
     var {pipe} = renderToPipeableStream(
         <App>
